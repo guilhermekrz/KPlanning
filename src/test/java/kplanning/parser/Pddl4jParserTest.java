@@ -1,6 +1,7 @@
 package kplanning.parser;
 
 import fr.uga.pddl4j.parser.Parser;
+import kplanning.DomainProblemAdapter;
 import kplanning.util.DomainProblemUtil;
 import org.junit.Test;
 
@@ -10,7 +11,8 @@ public class Pddl4jParserTest {
 
 	@Test
 	public void parseDrinkAndDrive() throws Exception {
-		Parser parser = Pddl4jParser.parse(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		Parser parser = adapter.getPddl4jParser().getParser();
 		assertEquals(0, parser.getDomain().getConstants().size());
 		assertEquals(5, parser.getDomain().getOperators().size());
 		assertEquals(5, parser.getDomain().getPredicates().size());
@@ -21,7 +23,8 @@ public class Pddl4jParserTest {
 
 	@Test
 	public void parseDrinkAndDriveConstraints() throws Exception {
-		Parser parser = Pddl4jParser.parse(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		Parser parser = adapter.getPddl4jParser().getParser();
 		assertEquals(0, parser.getDomain().getConstants().size());
 		assertEquals(5, parser.getDomain().getOperators().size());
 		assertEquals(5, parser.getDomain().getPredicates().size());

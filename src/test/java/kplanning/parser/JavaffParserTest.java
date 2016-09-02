@@ -3,6 +3,7 @@ package kplanning.parser;
 import javaff.data.GroundProblem;
 import javaff.data.UngroundProblem;
 import javaff.data.strips.And;
+import kplanning.DomainProblemAdapter;
 import kplanning.util.DomainProblemUtil;
 import org.junit.Test;
 
@@ -12,7 +13,8 @@ public class JavaffParserTest {
 
 	@Test
 	public void parseUngroundProblem21() throws Exception {
-		UngroundProblem ungroundProblem = JavaffParser.parseUngroundProblem21(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), 21);
+		UngroundProblem ungroundProblem = adapter.getJavaffParser().getUngroundProblem();
 		assertEquals(0, ungroundProblem.constants.size());
 		assertEquals(5, ungroundProblem.actions.size());
 		assertEquals(5, ungroundProblem.predSymbols.size());
@@ -23,7 +25,8 @@ public class JavaffParserTest {
 
 	@Test
 	public void parseGroundProblem21() throws Exception {
-		GroundProblem groundProblem = JavaffParser.parseGroundProblem21(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), 21);
+		GroundProblem groundProblem = adapter.getJavaffParser().getGroundProblem();
 		assertEquals(7, groundProblem.getActions().size());
 		assertEquals(4, groundProblem.getGroundedPropositions().size());
 		assertEquals(2, ((And) groundProblem.getGoal()).size());
@@ -32,7 +35,8 @@ public class JavaffParserTest {
 
 	@Test
 	public void parseUngroundProblem30() throws Exception {
-		UngroundProblem ungroundProblem = JavaffParser.parseUngroundProblem30(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		UngroundProblem ungroundProblem = adapter.getJavaffParser().getUngroundProblem();
 		assertEquals(0, ungroundProblem.constants.size());
 		assertEquals(5, ungroundProblem.actions.size());
 		assertEquals(5, ungroundProblem.predSymbols.size());
@@ -44,7 +48,8 @@ public class JavaffParserTest {
 
 	@Test
 	public void parseGroundProblem30() throws Exception {
-		GroundProblem groundProblem = JavaffParser.parseGroundProblem30(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 1));
+		GroundProblem groundProblem = adapter.getJavaffParser().getGroundProblem();
 		assertEquals(7, groundProblem.getActions().size());
 		assertEquals(4, groundProblem.getGroundedPropositions().size());
 		assertEquals(2, ((And) groundProblem.getGoal()).size());
