@@ -5,11 +5,13 @@ import javaff.data.CompoundLiteral;
 import javaff.data.strips.UngroundInstantAction;
 import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
+import kplanning.plan.Plan;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ConditionalNorm {
+public class ConditionalNorm implements Norm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 
@@ -70,6 +72,18 @@ public class ConditionalNorm {
 	}
 
 	@Override
+	public boolean isViolationPlan(Plan plan) {
+		List<STRIPSState> states = plan.getStates();
+		List<Action> actions = plan.getActions();
+		for(int i=0;i<states.size()-1;i++) {
+			if(isViolationState(states.get(i), actions.get(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return "n=(" + normModality + "," + context + "," + actionTriggerCondition.name + ")";
 	}
@@ -92,5 +106,4 @@ public class ConditionalNorm {
 		h = 37 * h + adapter.hashCode();
 		return h;
 	}
-
 }

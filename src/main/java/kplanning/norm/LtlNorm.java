@@ -2,9 +2,13 @@ package kplanning.norm;
 
 import fr.uga.pddl4j.parser.Connective;
 import javaff.data.CompoundLiteral;
+import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
+import kplanning.plan.Plan;
 
-public class LtlNorm {
+import java.util.List;
+
+public class LtlNorm implements Norm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 
@@ -41,6 +45,107 @@ public class LtlNorm {
 
 	public int getT() {
 		return t;
+	}
+
+	@Override
+	public boolean isViolationPlan(Plan plan) {
+		List<STRIPSState> states = plan.getStates();
+		if(connective == Connective.ALWAYS) {
+			for (STRIPSState state : states) {
+				if (!state.isTrue(o)) {
+					return true;
+				}
+			}
+		} else if(connective == Connective.AT_END) {
+			if(!states.get(states.size()-1).isTrue(o)) {
+				return true;
+			}
+		} else if(connective == Connective.SOMETIME) {
+			boolean occurred = false;
+			for (STRIPSState state : states) {
+				if (state.isTrue(o)) {
+					occurred = true;
+					break;
+				}
+			}
+			if(!occurred) {
+				return true;
+			}
+		} else if(connective == Connective.AT_MOST_ONCE) {
+			boolean occurred = false;
+			boolean alreadyOccurred = false;
+			for (STRIPSState state : states) {
+				if (state.isTrue(o)) {
+					if (alreadyOccurred) {
+						return true;
+					} else {
+						occurred = true;
+					}
+				} else {
+					if (occurred) {
+						occurred = false;
+						alreadyOccurred = true;
+					}
+				}
+			}
+		} else if(connective == Connective.SOMETIME_AFTER) {
+			for (int i=0;i<states.size();i++) {
+				STRIPSState state = states.get(i);
+				if (state.isTrue(o)) {
+					boolean existsAfter = false;
+					for (int j=i;j<states.size();j++) {
+						STRIPSState stateV = states.get(j);
+						if (stateV.isTrue(v)) {
+							existsAfter = true;
+							break;
+						}
+					}
+					if(!existsAfter) {
+						return true;
+					}
+				}
+			}
+		} else if(connective == Connective.SOMETIME_BEFORE) {
+			for (int i=0;i<states.size();i++) {
+				STRIPSState state = states.get(i);
+				if (state.isTrue(o)) {
+					boolean existsBefore = false;
+					for (int j=0;j<i;j++) {
+						STRIPSState stateV = states.get(j);
+						if (stateV.isTrue(v)) {
+							existsBefore = true;
+							break;
+						}
+					}
+					if(!existsBefore) {
+						return true;
+					}
+				}
+			}
+		} else if(connective == Connective.ALWAYS_WITHIN) {
+			for (int i=0;i<states.size();i++) {
+				STRIPSState state = states.get(i);
+				if (state.isTrue(o)) {
+					boolean existsAfter = false;
+					for (int j=i;j<states.size();j++) {
+						if(j-i > t) {
+							break;
+						}
+						STRIPSState stateV = states.get(j);
+						if (stateV.isTrue(v)) {
+							existsAfter = true;
+							break;
+						}
+					}
+					if(!existsAfter) {
+						return true;
+					}
+				}
+			}
+		} else {
+			throw new IllegalStateException("Connective not supported for norms: " + connective);
+		}
+		return false;
 	}
 
 	@Override
