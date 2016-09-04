@@ -65,6 +65,10 @@ public class JavaffParser {
 	 * Miscellaneous
 	 */
 
+	/**
+	 * Miscellaneous - Propositions
+	 */
+
 	public Proposition getBaseGroundProposition(Fact fact) {
 		if(fact instanceof Proposition) {
 			return (Proposition) fact;
@@ -90,52 +94,6 @@ public class JavaffParser {
 		return (Set<Fact>) (Set<?>) groundProblem.getGroundedPropositions();
 	}
 
-	public STRIPSState getCompleteInitState() {
-		return addMissingFluentFactsToStripsState(this.groundProblem.getSTRIPSInitialState());
-	}
-
-	public STRIPSState getStripsState(String state) {
-		Set<Fact> trueFacts = new HashSet<>();
-		Set<Not> falseFacts = new HashSet<>();
-
-		List<String> strings = Arrays.asList(state.trim().split(","));
-		for(String s:strings) {
-			List<String> strings1 = Arrays.asList(s.trim().split(" "));
-
-			if(strings1.get(0).trim().isEmpty()) {
-				// Empty
-				continue;
-			}
-
-			if(strings1.get(0).equals("not")) {
-				List<String> strings2 = new ArrayList<>();
-				for(int i=1;i<strings1.size();i++) {
-					strings2.add(strings1.get(i));
-				}
-				falseFacts.add(new Not(getProposition(strings2)));
-			} else {
-				trueFacts.add(getProposition(strings1));
-			}
-		}
-		STRIPSState stripsState = new STRIPSState(groundProblem.getActions(), trueFacts, falseFacts, groundProblem.getGoal());
-		return addMissingFluentFactsToStripsState(stripsState);
-	}
-
-	public STRIPSState getRandomState() {
-		Set<Fact> trueFacts = new HashSet<>();
-		Set<Not> falseFacts = new HashSet<>();
-		Random random = new Random();
-		for(Proposition proposition : getGroundedPropositions()) {
-			int r = random.nextInt(2) + 1; // r can only be 1 or 2;
-			if(r == 1) {
-				trueFacts.add(proposition);
-			} else {
-				falseFacts.add(new Not(proposition));
-			}
-		}
-		return new STRIPSState(groundProblem.getActions(), trueFacts, falseFacts, groundProblem.getGoal());
-	}
-
 	public Proposition getProposition(List<String> propositionList) {
 		for(Proposition proposition1:this.groundProblem.getGroundedPropositions()) {
 			if(propositionList.size() == proposition1.getParameters().size() + 1) {
@@ -154,51 +112,6 @@ public class JavaffParser {
 			}
 		}
 		throw new RuntimeException("Not found proposition: " + propositionList);
-	}
-
-	@Nullable
-	public Action getAction(String action) {
-		List<String> a1 = Arrays.asList(action.trim().split(" "));
-		String name = a1.get(0);
-		for(Action a:this.groundProblem.getActions()) {
-			if(a.getName().toString().equals(name)) {
-				if(a.getParameters().size() == a1.size() - 1) {
-					boolean isEqual = true;
-					for(int i=0;i<a.getParameters().size();i++) {
-						Parameter p = a.getParameters().get(i);
-						String expP = a1.get(i+1);
-						if(!p.getName().equals(expP)) {
-							isEqual = false;
-							break;
-						}
-					}
-					if(isEqual) {
-						return a;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	public UngroundInstantAction getUngroundAction(String name) {
-		for(Operator tempOp:this.ungroundProblem.actions) {
-			if(tempOp.name.toString().equals(name)) {
-				return (UngroundInstantAction)tempOp;
-			}
-		}
-		throw new NotFoundActionException("Not found unground action (operator): " + name);
-	}
-
-	public Set<Action> getGroundActions(UngroundInstantAction ungroundAction) {
-		Set<Action> actions = new HashSet<>();
-		for(Action action:this.groundProblem.getActions()) {
-			if(action.getName().equals(ungroundAction.name)) {
-				actions.add(action);
-			}
-		}
-		return actions;
-//		return ungroundAction.ground(this.ungroundProblem); This leaves static facts as preconditions
 	}
 
 	public Set<CompoundLiteral> getGroundedCompoundLiteral(CompoundLiteral compoundLiteral) {
@@ -252,6 +165,56 @@ public class JavaffParser {
 			}
 		}
 		throw new NotFoundPredicateSymbolException("Not found predicate symbol: " + predicate);
+	}
+
+	/**
+	 * Miscellaneous - States
+	 */
+
+	public STRIPSState getCompleteInitState() {
+		return addMissingFluentFactsToStripsState(this.groundProblem.getSTRIPSInitialState());
+	}
+
+	public STRIPSState getStripsState(String state) {
+		Set<Fact> trueFacts = new HashSet<>();
+		Set<Not> falseFacts = new HashSet<>();
+
+		List<String> strings = Arrays.asList(state.trim().split(","));
+		for(String s:strings) {
+			List<String> strings1 = Arrays.asList(s.trim().split(" "));
+
+			if(strings1.get(0).trim().isEmpty()) {
+				// Empty
+				continue;
+			}
+
+			if(strings1.get(0).equals("not")) {
+				List<String> strings2 = new ArrayList<>();
+				for(int i=1;i<strings1.size();i++) {
+					strings2.add(strings1.get(i));
+				}
+				falseFacts.add(new Not(getProposition(strings2)));
+			} else {
+				trueFacts.add(getProposition(strings1));
+			}
+		}
+		STRIPSState stripsState = new STRIPSState(groundProblem.getActions(), trueFacts, falseFacts, groundProblem.getGoal());
+		return addMissingFluentFactsToStripsState(stripsState);
+	}
+
+	public STRIPSState getRandomState() {
+		Set<Fact> trueFacts = new HashSet<>();
+		Set<Not> falseFacts = new HashSet<>();
+		Random random = new Random();
+		for(Proposition proposition : getGroundedPropositions()) {
+			int r = random.nextInt(2) + 1; // r can only be 1 or 2;
+			if(r == 1) {
+				trueFacts.add(proposition);
+			} else {
+				falseFacts.add(new Not(proposition));
+			}
+		}
+		return new STRIPSState(groundProblem.getActions(), trueFacts, falseFacts, groundProblem.getGoal());
 	}
 
 	public Set<STRIPSState> getAllReachableStates() {
@@ -309,6 +272,55 @@ public class JavaffParser {
 			allPossibleStripsStates.add(state);
 		}
 		return allPossibleStripsStates;
+	}
+
+	/**
+	 * Miscellaneous - Actions
+	 */
+
+	@Nullable
+	public Action getAction(String action) {
+		List<String> a1 = Arrays.asList(action.trim().split(" "));
+		String name = a1.get(0);
+		for(Action a:this.groundProblem.getActions()) {
+			if(a.getName().toString().equals(name)) {
+				if(a.getParameters().size() == a1.size() - 1) {
+					boolean isEqual = true;
+					for(int i=0;i<a.getParameters().size();i++) {
+						Parameter p = a.getParameters().get(i);
+						String expP = a1.get(i+1);
+						if(!p.getName().equals(expP)) {
+							isEqual = false;
+							break;
+						}
+					}
+					if(isEqual) {
+						return a;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public UngroundInstantAction getUngroundAction(String name) {
+		for(Operator tempOp:this.ungroundProblem.actions) {
+			if(tempOp.name.toString().equals(name)) {
+				return (UngroundInstantAction)tempOp;
+			}
+		}
+		throw new NotFoundActionException("Not found unground action (operator): " + name);
+	}
+
+	public Set<Action> getGroundActions(UngroundInstantAction ungroundAction) {
+		Set<Action> actions = new HashSet<>();
+		for(Action action:this.groundProblem.getActions()) {
+			if(action.getName().equals(ungroundAction.name)) {
+				actions.add(action);
+			}
+		}
+		return actions;
+//		return ungroundAction.ground(this.ungroundProblem); This leaves static facts as preconditions
 	}
 
 	/**
