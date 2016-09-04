@@ -8,7 +8,7 @@ import kplanning.plan.Plan;
 
 import java.util.List;
 
-public class LtlNorm implements Norm {
+public class LtlNorm extends Norm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ConditionalNorm implements Norm {
+public class ConditionalNorm extends Norm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 

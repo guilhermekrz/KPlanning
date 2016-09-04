@@ -8,9 +8,9 @@ import java.util.Set;
 public class PlanNorm {
 	private Set<Plan> violationPlans;
 	private Set<Plan> nonViolationPlans;
-	private Set<Norm> norms;
+	private Set<? extends Norm> norms;
 
-	public PlanNorm(Set<Plan> allPlans, Set<Norm> norms) {
+	public PlanNorm(Set<Plan> allPlans, Set<? extends Norm> norms) {
 		this.norms = norms;
 		violationPlans = new HashSet<>();
 		nonViolationPlans = new HashSet<>();
@@ -38,7 +38,7 @@ public class PlanNorm {
 		return nonViolationPlans;
 	}
 
-	public Set<Norm> getNorms() {
+	public Set<? extends Norm> getNorms() {
 		return norms;
 	}
 }
