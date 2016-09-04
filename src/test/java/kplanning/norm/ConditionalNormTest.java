@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class NormTest {
+public class ConditionalNormTest {
 	private DomainProblemAdapter adapter;
 	@Before
 	public void setUp() throws Exception {
@@ -27,7 +27,7 @@ public class NormTest {
 
 	@Test
 	public void testIsPossibleViolationStateWithSimpleProhibitionNorm1() {
-		Norm simpleNorm = getSimpleNorm1();
+		ConditionalNorm simpleNorm = getSimpleNorm1();
 
 		// True
 		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a")));
@@ -46,7 +46,7 @@ public class NormTest {
 
 	@Test
 	public void testIsPossibleViolationStateWithSimpleObligationNorm2() {
-		Norm simpleNorm = getSimpleNorm2();
+		ConditionalNorm simpleNorm = getSimpleNorm2();
 
 		// True
 		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a")));
@@ -65,7 +65,7 @@ public class NormTest {
 
 	@Test
 	public void testIsPossibleViolationStateWithComplexProhibitionNorm1() {
-		Norm simpleNorm = getComplexNorm1();
+		ConditionalNorm simpleNorm = getComplexNorm1();
 
 		// True
 		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at a")));
@@ -93,10 +93,10 @@ public class NormTest {
 
 	@Test
 	public void testEquals() {
-		Norm simpleNorm1 = getSimpleNorm1();
-		Norm simpleNorm2 = getSimpleNorm2();
-		Norm complexNorm1 = getComplexNorm1();
-		Norm complexNorm1Alt = getComplexNorm1Alt();
+		ConditionalNorm simpleNorm1 = getSimpleNorm1();
+		ConditionalNorm simpleNorm2 = getSimpleNorm2();
+		ConditionalNorm complexNorm1 = getComplexNorm1();
+		ConditionalNorm complexNorm1Alt = getComplexNorm1Alt();
 
 		assertFalse(simpleNorm1.equals(simpleNorm2));
 		assertFalse(simpleNorm1.equals(complexNorm1));
@@ -111,29 +111,29 @@ public class NormTest {
 	 * Helper methods
 	 */
 
-	private Norm getSimpleNorm1() {
+	private ConditionalNorm getSimpleNorm1() {
 		Predicate drunk = new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"));
 		CompoundLiteral compoundLiteral = new And(Collections.singleton(drunk));
-		return new Norm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
-	private Norm getSimpleNorm2() {
+	private ConditionalNorm getSimpleNorm2() {
 		Predicate drunk = new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"));
 		CompoundLiteral compoundLiteral = new And(Collections.singleton(drunk));
-		return new Norm(adapter, NormModality.OBLIGATION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, NormModality.OBLIGATION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
-	private Norm getComplexNorm1() {
+	private ConditionalNorm getComplexNorm1() {
 		Not notDrunk = new Not(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk")));
 		Predicate at = new Predicate(adapter.getJavaffParser().getPredicateSymbol("at"));
 		CompoundLiteral compoundLiteral = new And(Arrays.asList(notDrunk, at));
-		return new Norm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
-	private Norm getComplexNorm1Alt() {
+	private ConditionalNorm getComplexNorm1Alt() {
 		Not notDrunk = new Not(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk")));
 		Predicate at = new Predicate(adapter.getJavaffParser().getPredicateSymbol("at"));
 		CompoundLiteral compoundLiteral = new And(Arrays.asList(at, notDrunk));
-		return new Norm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 }

@@ -9,7 +9,7 @@ import kplanning.DomainProblemAdapter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Norm {
+public class ConditionalNorm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 
@@ -21,7 +21,7 @@ public class Norm {
 	private UngroundInstantAction actionTriggerCondition;
 	private Set<Action> groundActionTriggerConditions;
 
-	public Norm(DomainProblemAdapter adapter, NormModality normModality, CompoundLiteral context, UngroundInstantAction actionTriggerCondition) {
+	public ConditionalNorm(DomainProblemAdapter adapter, NormModality normModality, CompoundLiteral context, UngroundInstantAction actionTriggerCondition) {
 		this.adapter = adapter;
 		this.normModality = normModality;
 		this.context = context;
@@ -77,9 +77,9 @@ public class Norm {
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
-		if (!(obj instanceof Norm)) return false;
+		if (!(obj instanceof ConditionalNorm)) return false;
 
-		Norm norm = (Norm) obj;
+		ConditionalNorm norm = (ConditionalNorm) obj;
 		return norm.groundContext.equals(groundContext) && norm.normModality == normModality && norm.actionTriggerCondition.equals(actionTriggerCondition) && norm.adapter == adapter;
 	}
 

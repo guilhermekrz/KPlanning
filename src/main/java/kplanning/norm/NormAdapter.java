@@ -15,7 +15,7 @@ import java.util.Set;
 public class NormAdapter {
 
 	private DomainProblemAdapter adapter;
-	private Set<Norm> norms;
+	private Set<ConditionalNorm> norms;
 	private Set<LtlNorm> ltlNorms;
 
 	/**
@@ -32,13 +32,13 @@ public class NormAdapter {
 		populateLtlNorms();
 	}
 
-	public Set<Norm> getNorms() {
+	public Set<ConditionalNorm> getNorms() {
 		return norms;
 	}
 
 	private void populateNorms() {
 		CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"))));
-		Norm norm = new Norm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		ConditionalNorm norm = new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 		norms = new HashSet<>(Collections.singletonList(norm));
 	}
 
