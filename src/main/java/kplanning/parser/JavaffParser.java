@@ -94,6 +94,25 @@ public class JavaffParser {
 		return (Set<Fact>) (Set<?>) groundProblem.getGroundedPropositions();
 	}
 
+	/**
+	 * Returns fact from string.
+	 * String format: ([not] predicate terms)
+	 */
+	public Fact getFact(String factString) {
+		List<String> strings = Arrays.asList(factString.replace('(', ' ').replace(')', ' ').trim().split(" "));
+		if(strings.get(0).equals("not")) {
+			List<String> strings2 = new ArrayList<>();
+			for(int i=1;i<strings.size();i++) {
+				if(!strings.get(i).trim().isEmpty()) {
+					strings2.add(strings.get(i));
+				}
+			}
+			return new Not(getProposition(strings2));
+		} else {
+			return getProposition(strings);
+		}
+	}
+
 	public Proposition getProposition(List<String> propositionList) {
 		for(Proposition proposition1:this.groundProblem.getGroundedPropositions()) {
 			if(propositionList.size() == proposition1.getParameters().size() + 1) {
@@ -300,7 +319,7 @@ public class JavaffParser {
 				}
 			}
 		}
-		return null;
+		throw new NotFoundActionException("Not found action: " + action);
 	}
 
 	public UngroundInstantAction getUngroundAction(String name) {

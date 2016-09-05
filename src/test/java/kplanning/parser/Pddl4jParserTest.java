@@ -34,4 +34,10 @@ public class Pddl4jParserTest {
 		assertEquals(1, parser.getProblem().getConstraints().getChildren().size());
 	}
 
+	@Test
+	public void parseAllConstraints30() throws Exception {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 2));
+		Parser parser = adapter.getPddl4jParser().getParser();
+		assertEquals(7, parser.getProblem().getConstraints().getChildren().size());
+	}
 }

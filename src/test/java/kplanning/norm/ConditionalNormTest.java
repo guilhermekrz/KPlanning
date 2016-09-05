@@ -15,7 +15,9 @@ import java.util.Collections;
 import static org.junit.Assert.*;
 
 public class ConditionalNormTest {
+
 	private DomainProblemAdapter adapter;
+
 	@Before
 	public void setUp() throws Exception {
 		adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 3));

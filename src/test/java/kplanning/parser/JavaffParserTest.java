@@ -57,4 +57,11 @@ public class JavaffParserTest {
 		assertEquals(1, ((And) groundProblem.getConstraints()).size());
 	}
 
+	@Test
+	public void parseAllConstraints30() throws Exception {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 2));
+		GroundProblem groundProblem = adapter.getJavaffParser().getGroundProblem();
+		assertEquals(7, ((And) groundProblem.getConstraints()).size());
+	}
+
 }

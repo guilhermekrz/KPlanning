@@ -13,17 +13,40 @@ public class Plan {
 	private List<STRIPSState> states;
 
 	public Plan(List<Operator> operators, DomainProblemAdapter adapter) {
-		actions = new ArrayList<>();
-		states = new ArrayList<>();
+		this.actions = new ArrayList<>();
+		this.states = new ArrayList<>();
 
 		STRIPSState currentState = adapter.getJavaffParser().getCompleteInitState();
-		states.add(currentState);
+		this.states.add(currentState);
 
 		for (Operator op : operators) {
 			Action action = adapter.getGraphplanJavaffConverter().getAction(op);
-			actions.add(action);
+			this.actions.add(action);
 			currentState = getNextState(currentState, action);
-			states.add(currentState);
+			this.states.add(currentState);
+		}
+	}
+
+	// Used only for test purposes
+	public static Plan newTestInstance(DomainProblemAdapter adapter, String... stringActions) {
+		List<Action> actions = new ArrayList<>();
+		for(String action : stringActions) {
+			actions.add(adapter.getJavaffParser().getAction(action));
+		}
+		return new Plan(true, actions, adapter);
+	}
+
+	private Plan(boolean isTest, List<Action> actions, DomainProblemAdapter adapter) {
+		this.actions = new ArrayList<>();
+		this.states = new ArrayList<>();
+
+		STRIPSState currentState = adapter.getJavaffParser().getCompleteInitState();
+		this.states.add(currentState);
+
+		for (Action action : actions) {
+			this.actions.add(action);
+			currentState = getNextState(currentState, action);
+			this.states.add(currentState);
 		}
 	}
 
