@@ -13,41 +13,18 @@ import java.util.Set;
 public class BitSetAction {
 	private DomainProblemAdapter domainProblemAdapter;
 	private Action action;
-	private BitSet preOrBitSet, preEqualsBitSet;
+	private BitSetFact bitSetFact;
 	private BitSet effOrAddList, effAndDeleteList;
 
 	public BitSetAction(DomainProblemAdapter domainProblemAdapter, Action action) {
 		this.domainProblemAdapter = domainProblemAdapter;
 		this.action = action;
-		populatePreconditionBitSet();
+		bitSetFact = new BitSetFact(this.domainProblemAdapter, action.getPreconditions());
 		populateEffectBitSet();
 	}
 
-	private void populatePreconditionBitSet() {
-		BitSetAdapter adapter = this.domainProblemAdapter.getBitSetAdapter();
-		List<Fact> preconditionsList = adapter.asSortedList(action.getPreconditions(), adapter.getDefaultFactComparator());
-		Iterator<Fact> iterator = preconditionsList.iterator();
-		Fact currentPrecondition = (iterator.hasNext())? iterator.next() : null;
-		List<Fact> list = adapter.asSortedList(domainProblemAdapter.getJavaffParser().getGroundedFacts(), adapter.getDefaultFactComparator());
-		preOrBitSet = new BitSet();
-		preEqualsBitSet = new BitSet();
-		for(int i = 0; i< list.size(); i++) {
-			Fact fact = list.get(i);
-			if(currentPrecondition == null) {
-				preOrBitSet.set(i);
-			} else {
-				boolean isTrue = domainProblemAdapter.getJavaffParser().isGroundFactTrue(currentPrecondition);
-				Proposition currentLiteralFact = domainProblemAdapter.getJavaffParser().getBaseGroundProposition(currentPrecondition);
-
-				if(fact.equals(currentLiteralFact)) {
-					preEqualsBitSet.set(i, isTrue);
-					currentPrecondition = (iterator.hasNext())? iterator.next() : null;
-				} else {
-					preOrBitSet.set(i);
-				}
-			}
-		}
-		preEqualsBitSet.or(preOrBitSet);
+	public Action getAction() {
+		return action;
 	}
 
 	private void populateEffectBitSet() {
@@ -84,14 +61,6 @@ public class BitSetAction {
 		effAndDeleteList.flip(0, list.size());
 	}
 
-	BitSet getPreOrBitSet() {
-		return preOrBitSet;
-	}
-
-	BitSet getPreEqualsBitSet() {
-		return preEqualsBitSet;
-	}
-
 	BitSet getEffOrAddList() {
 		return effOrAddList;
 	}
@@ -101,9 +70,7 @@ public class BitSetAction {
 	}
 
 	public boolean isApplicable(BitSet state) {
-		BitSet currentState = (BitSet) state.clone();
-		currentState.or(preOrBitSet);
-		return currentState.equals(preEqualsBitSet);
+		return bitSetFact.isTrue(state);
 	}
 
 	public BitSet applyActionToState(BitSet state) {
@@ -114,5 +81,10 @@ public class BitSetAction {
 		nextState.or(effOrAddList);
 		nextState.and(effAndDeleteList);
 		return nextState;
+	}
+
+	@Override
+	public String toString() {
+		return action.toString();
 	}
 }

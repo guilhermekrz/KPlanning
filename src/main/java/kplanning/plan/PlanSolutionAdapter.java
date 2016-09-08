@@ -15,8 +15,8 @@ public class PlanSolutionAdapter {
 	public PlanSolutionAdapter(PlanSolution planSolution, DomainProblemAdapter adapter) {
 		allPlans = new HashSet<>();
 		Set<List<Operator>> plans = planSolution.getAllPlans();
-		for(List<Operator> plan:plans) {
-			allPlans.add(new Plan(plan, adapter));
+		for(List<Operator> operators : plans) {
+			allPlans.add(Plan.newPlanFromOperators(operators, adapter));
 		}
 	}
 

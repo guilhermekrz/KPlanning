@@ -25,16 +25,6 @@ public class BitSetActionTest {
 		// A1
 		BitSetAction a1 = new BitSetAction(adapter, adapter.getJavaffParser().getAction("move a b"));
 
-		// Preconditions
-		BitSet expectedPreOrBitSet1 = new BitSet();
-		expectedPreOrBitSet1.set(2);
-		expectedPreOrBitSet1.set(3);
-		BitSet expectedPreEqualsBitSet1 = new BitSet();
-		expectedPreEqualsBitSet1.set(0);
-		expectedPreEqualsBitSet1.or(expectedPreOrBitSet1);
-		assertEquals(expectedPreEqualsBitSet1, a1.getPreEqualsBitSet());
-		assertEquals(expectedPreOrBitSet1, a1.getPreOrBitSet());
-
 		// Effects
 		BitSet expectedEffOrAddList1 = new BitSet();
 		expectedEffOrAddList1.set(1);
@@ -47,17 +37,6 @@ public class BitSetActionTest {
 		// A2
 		BitSetAction a2 = new BitSetAction(adapter, adapter.getJavaffParser().getAction("drink bara"));
 
-		// Preconditions
-		BitSet expectedPreOrBitSet2 = new BitSet();
-		expectedPreOrBitSet2.set(0);
-		expectedPreOrBitSet2.set(1);
-		expectedPreOrBitSet2.set(2);
-		BitSet expectedPreEqualsBitSet2 = new BitSet();
-		expectedPreEqualsBitSet2.set(3);
-		expectedPreEqualsBitSet2.or(expectedPreOrBitSet2);
-		assertEquals(expectedPreEqualsBitSet2, a2.getPreEqualsBitSet());
-		assertEquals(expectedPreOrBitSet2, a2.getPreOrBitSet());
-
 		// Effects
 		BitSet expectedEffOrAddList2 = new BitSet();
 		expectedEffOrAddList2.set(2);
@@ -68,16 +47,6 @@ public class BitSetActionTest {
 
 		// A3
 		BitSetAction a3 = new BitSetAction(adapter, adapter.getJavaffParser().getAction("move b a"));
-
-		// Preconditions
-		BitSet expectedPreOrBitSet3 = new BitSet();
-		expectedPreOrBitSet3.set(2);
-		expectedPreOrBitSet3.set(3);
-		BitSet expectedPreEqualsBitSet3 = new BitSet();
-		expectedPreEqualsBitSet3.set(1);
-		expectedPreEqualsBitSet3.or(expectedPreOrBitSet3);
-		assertEquals(expectedPreEqualsBitSet3, a3.getPreEqualsBitSet());
-		assertEquals(expectedPreOrBitSet3, a3.getPreOrBitSet());
 
 		// Effects
 		BitSet expectedEffOrAddList3 = new BitSet();

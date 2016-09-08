@@ -60,6 +60,10 @@ public class BitSetAdapter {
 		return bitSet;
 	}
 
+	public BitSetFact getBitSetFact(Fact fact) {
+		return new BitSetFact(adapter, fact);
+	}
+
 	public STRIPSState getStateFromBitSet(BitSet bitSet) {
 		List<Fact> list = asSortedList(adapter.getJavaffParser().getGroundedFacts(), getDefaultFactComparator());
 		Set<Fact> trueFacts = new HashSet<>();
@@ -75,6 +79,7 @@ public class BitSetAdapter {
 		return new STRIPSState(adapter.getJavaffParser().getGroundProblem().getActions(), trueFacts, negatedFacts, adapter.getJavaffParser().getGroundProblem().getGoal());
 	}
 
+	// TODO: find a better way to do this... it seems too costly
 	<T> List<T> asSortedList(Set<T> set, Comparator<T> comparator) {
 		List<T> list = new ArrayList<>(set);
 		Collections.sort(list, comparator);

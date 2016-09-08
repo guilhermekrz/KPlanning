@@ -1,0 +1,6 @@
+(define (problem YEAST)
+   (:domain blocksworld)
+   (:objects t s e r y a)
+   (:init (onTable y) (on e y) (on r e) (on a r) (on t a) (on s t) (clear s))
+   (:goal (and (onTable t) (on s t) (on a s) (on e a) (clear y) (on y e) ))
+ )

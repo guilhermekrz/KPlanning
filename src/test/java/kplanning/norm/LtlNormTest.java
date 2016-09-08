@@ -24,9 +24,9 @@ public class LtlNormTest {
 
 	@Test
 	public void testAlways() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at a"));
@@ -40,9 +40,9 @@ public class LtlNormTest {
 
 	@Test
 	public void testAtEnd() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at b"));
@@ -56,12 +56,12 @@ public class LtlNormTest {
 
 	@Test
 	public void testSometime() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
-		Plan plan4 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara");
-		Plan plan5 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
-		Plan plan6 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
+		Plan plan4 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara");
+		Plan plan5 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
+		Plan plan6 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("inbar bara"));
@@ -78,13 +78,13 @@ public class LtlNormTest {
 
 	@Test
 	public void testAtMostOnce() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
-		Plan plan4 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara");
-		Plan plan5 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
-		Plan plan6 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
-		Plan plan7 = Plan.newTestInstance(adapter, "move a b", "move b a");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
+		Plan plan4 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara");
+		Plan plan5 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
+		Plan plan6 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
+		Plan plan7 = Plan.newPlanFromStringActions(adapter, "move a b", "move b a");
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at a"));
@@ -102,13 +102,13 @@ public class LtlNormTest {
 
 	@Test
 	public void testSometimeAfter() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
-		Plan plan4 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara");
-		Plan plan5 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
-		Plan plan6 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
-		Plan plan7 = Plan.newTestInstance(adapter, "move a b", "move b a");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
+		Plan plan4 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara");
+		Plan plan5 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
+		Plan plan6 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
+		Plan plan7 = Plan.newPlanFromStringActions(adapter, "move a b", "move b a");
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at b"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at a"));
@@ -126,13 +126,13 @@ public class LtlNormTest {
 
 	@Test
 	public void testSometimeBefore() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
-		Plan plan4 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara");
-		Plan plan5 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
-		Plan plan6 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
-		Plan plan7 = Plan.newTestInstance(adapter, "move a b", "move b a");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
+		Plan plan4 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara");
+		Plan plan5 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
+		Plan plan6 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
+		Plan plan7 = Plan.newPlanFromStringActions(adapter, "move a b", "move b a");
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at b"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at a")); v.add(adapter.getJavaffParser().getFact("drunk"));
@@ -150,14 +150,14 @@ public class LtlNormTest {
 
 	@Test
 	public void testAlwaysWithin() {
-		Plan plan1 = Plan.newTestInstance(adapter, "sleep a");
-		Plan plan2 = Plan.newTestInstance(adapter, "sleep a", "sleep a");
-		Plan plan3 = Plan.newTestInstance(adapter, "sleep a", "move a b");
-		Plan plan4 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara");
-		Plan plan5 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
-		Plan plan6 = Plan.newTestInstance(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
-		Plan plan7 = Plan.newTestInstance(adapter, "move a b", "move b a");
-		Plan plan8 = Plan.newTestInstance(adapter, "move a b");
+		Plan plan1 = Plan.newPlanFromStringActions(adapter, "sleep a");
+		Plan plan2 = Plan.newPlanFromStringActions(adapter, "sleep a", "sleep a");
+		Plan plan3 = Plan.newPlanFromStringActions(adapter, "sleep a", "move a b");
+		Plan plan4 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara");
+		Plan plan5 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b");
+		Plan plan6 = Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b", "move b a");
+		Plan plan7 = Plan.newPlanFromStringActions(adapter, "move a b", "move b a");
+		Plan plan8 = Plan.newPlanFromStringActions(adapter, "move a b");
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at a"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at b"));
