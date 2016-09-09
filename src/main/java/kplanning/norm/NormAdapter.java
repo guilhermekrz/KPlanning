@@ -6,7 +6,13 @@ import javaff.data.CompoundLiteral;
 import javaff.data.strips.And;
 import javaff.data.strips.Predicate;
 import kplanning.DomainProblemAdapter;
+import kplanning.exception.NotFoundActionException;
+import kplanning.exception.NotFoundPredicateSymbolException;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +34,7 @@ public class NormAdapter {
 
 	private NormAdapter(DomainProblemAdapter adapter) {
 		this.adapter = adapter;
-		populateNorms();
+		populateConditionalNorms();
 		populateLtlNorms();
 	}
 
@@ -36,10 +42,39 @@ public class NormAdapter {
 		return conditionalNorms;
 	}
 
-	private void populateNorms() {
-		CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"))));
-		ConditionalNorm norm = new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
-		conditionalNorms = new HashSet<>(Collections.singletonList(norm));
+	private void populateConditionalNorms() {
+		String conditionalNormsFile = adapter.getDomainProblem().getBasePath() + "/conditionalNorms.pddl";
+		conditionalNorms = new HashSet<>();
+		File file = new File(conditionalNormsFile);
+		if(file.exists()) {
+			try (BufferedReader br = new BufferedReader(new FileReader(conditionalNormsFile))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					String[] split = line.trim().split(";");
+					if (split.length == 3) {
+						String modality = split[0];
+						String context = split[1]; // TODO: separate by comma
+						String action = split[2];
+
+						try {
+							NormModality normModality = NormModality.valueOf(modality);
+							CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
+							conditionalNorms.add(new ConditionalNorm(adapter, normModality, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action)));
+						} catch (IllegalArgumentException e) {
+							System.out.println("NormModality should be either PROHIBITION or OBLIGATION");
+						} catch (NotFoundPredicateSymbolException e) {
+							System.out.println("Not found specified predicate(s): " + context);
+						} catch (NotFoundActionException e) {
+							System.out.println("Not found specified action: " + action);
+						}
+					} else {
+						System.out.println("Error! Each line should have three elements: " + line);
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Set<LtlNorm> getLtlNorms() {
