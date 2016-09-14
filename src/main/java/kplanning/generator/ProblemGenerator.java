@@ -188,7 +188,6 @@ public class ProblemGenerator {
 			for (int i = 0; i < numNodes; i++) {
 				for (int j = 0; j < numNodes; j++) {
 					if (i != j) {
-//					System.out.println(i + " " + j + " -> " + (((double) Math.abs(i - j)) / numNodes));
 						if (random.nextDouble() > (((double) Math.abs(i - j)) / numNodes)) {
 							if (random.nextDouble() < 0.2) {
 								g.addEdge("loc" + (i + 1), "loc" + (j + 1));
@@ -212,7 +211,7 @@ public class ProblemGenerator {
 			this.treatAsRandom = treatAsRandom;
 		}
 
-		public Set<PredicateProbability> getPredicateProbabilitySet() {
+		Set<PredicateProbability> getPredicateProbabilitySet() {
 			return predicateProbabilitySet;
 		}
 
