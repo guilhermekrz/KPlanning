@@ -28,6 +28,10 @@ public class PlanSolution {
 		}
 	}
 
+	public Set<List<Set<Action>>> getSolutions() {
+		return solutions;
+	}
+
 	public Set<Plan> getPlans() {
 		if(plans == null) {
 			this.plans = new HashSet<>();

@@ -11,10 +11,14 @@ public class PlanUtil {
 	static Set<Action> getActionsWithoutNoOp(Set<Action> actions) {
 		Set<Action> actionsWithoutNoOp = new HashSet<>();
 		for(Action action : actions) {
-			if(!action.getName().toString().startsWith(INTERNAL_NOOP_ACTION_NAME)) {
+			if(!isNoOpAction(action)) {
 				actionsWithoutNoOp.add(action);
 			}
 		}
 		return actionsWithoutNoOp;
+	}
+
+	public static boolean isNoOpAction(Action action) {
+		return action.getName().toString().startsWith(INTERNAL_NOOP_ACTION_NAME);
 	}
 }
