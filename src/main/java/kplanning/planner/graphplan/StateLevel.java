@@ -2,9 +2,11 @@ package kplanning.planner.graphplan;
 
 import javaff.data.Action;
 import javaff.data.Fact;
-import javaff.planning.STRIPSState;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static kplanning.planner.graphplan.MutexHelper.INCONSISTENT_SUPPORT;
 import static kplanning.planner.graphplan.MutexHelper.NO_MUTEX;
@@ -17,14 +19,8 @@ class StateLevel {
 	private int level;
 	private ActionLevel previousActionLevel;
 
-	StateLevel(MutexHelper mutexKeeper, STRIPSState initialState) {
-		this.mutexKeeper = mutexKeeper;
-		this.level = 0;
-		this.facts = new HashSet<>();
-		for(Fact fact : initialState.getFacts()) {
-			this.facts.add(fact);
-		}
-		populateMutex();
+	StateLevel(MutexHelper mutexKeeper, Set<Fact> facts) {
+		this(mutexKeeper, 0, facts, null, null);
 	}
 
 	StateLevel(MutexHelper mutexKeeper, int level, Set<Fact> facts, Map<Fact, List<Action>> actionsThatAddFacts, ActionLevel previousActionLevel) {
@@ -78,9 +74,9 @@ class StateLevel {
 		return Collections.unmodifiableMap(actionsThatAddFacts);
 	}
 
-	boolean isFactsMutex(Set<Fact> facts) {
-		for(Fact fact1 : facts) {
-			for(Fact fact2 : facts) {
+	boolean isFactsMutex(Set<Fact> factsMutex) {
+		for(Fact fact1 : factsMutex) {
+			for(Fact fact2 : factsMutex) {
 				if(isFactMutex(fact1, fact2)) {
 					return true;
 				}

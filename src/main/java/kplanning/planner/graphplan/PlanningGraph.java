@@ -24,6 +24,8 @@ public class PlanningGraph {
 	private MutexHelper mutexKeeper;
 	private Set<Pair<Integer, Set<Fact>>> noGoods;
 	private Map<Integer, Integer> noGoodsCount; // level, no goods count
+	private Map<Fact, Integer> levelCost;
+	private Map<Action, Integer> actionCost;
 
 	public PlanningGraph(DomainProblemAdapter adapter) {
 		this.adapter = adapter;
@@ -31,6 +33,8 @@ public class PlanningGraph {
 		actionLevels = new ArrayList<>();
 		populateActions();
 		mutexKeeper = new MutexHelper(adapter, actions);
+		levelCost = new HashMap<>();
+		actionCost = new HashMap<>();
 		addInitialLevel();
 		noGoods = new HashSet<>();
 		noGoodsCount = new HashMap<>();
@@ -47,7 +51,10 @@ public class PlanningGraph {
 	}
 
 	private void addInitialLevel() {
-		stateLevels.add(new StateLevel(mutexKeeper, adapter.getJavaffParser().getCompleteInitState()));
+		Set<Fact> initialStateFacts = adapter.getJavaffParser().getCompleteInitState().getFacts();
+		stateLevels.add(new StateLevel(mutexKeeper, initialStateFacts));
+		populateLevelCost(initialStateFacts, getCurrentLevel());
+
 	}
 
 	public boolean isGoalPossible() {
@@ -61,7 +68,6 @@ public class PlanningGraph {
 	public void expandGraph() {
 		Logger.debug("Expanding Graph to Level {}", getCurrentLevel() + 1);
 		StateLevel previousLevel = getLastStateLevel();
-		Set<Action> actions = adapter.getJavaffParser().getGroundProblem().getActions();
 		Set<Action> applicableActions = new HashSet<>();
 		Set<Fact> applicableActionsEffects = new HashSet<>();
 		Map<Fact, List<Action>> actionsThatAddFact = new HashMap<>();
@@ -83,6 +89,7 @@ public class PlanningGraph {
 		nextLevelFacts.addAll(applicableActionsEffects);
 		StateLevel nextLevel = new StateLevel(mutexKeeper, getCurrentLevel() + 1, nextLevelFacts, actionsThatAddFact, actionLevel);
 		stateLevels.add(nextLevel);
+		populateLevelCost(nextLevelFacts, getCurrentLevel());
 	}
 
 	/**
@@ -166,6 +173,7 @@ public class PlanningGraph {
 		}
 	}
 
+	// TODO: how to guarantee to return the best solution?
 	@Nullable
 	private Set<List<Set<Action>>> extractSolution(int level, Set<Fact> subgoalFacts, boolean foundAllSolutions) {
 		if(level == 0) {
@@ -186,11 +194,19 @@ public class PlanningGraph {
 
 		Map<Fact, List<Action>> actionsThatAddFacts = stateLevels.get(level).getActionsThatAddFacts();
 		Map<Fact, List<Action>> actionsThatAddFactsMutable = new HashMap<>(actionsThatAddFacts);
-		Set<List<Action>> allActions = new HashSet<>();
-		for(Fact fact : subgoalFacts) {
+		List<List<Action>> allActions = new ArrayList<>();
+
+		// 1. Pick first the literal with the highest level cost.
+		List<Fact> subgoalFactsList = new ArrayList<>(subgoalFacts);
+		subgoalFactsList.sort((fact1, fact2) -> {
+			Integer l1 = levelCost.get(fact1);
+			Integer l2 = levelCost.get(fact2);
+			return l2.compareTo(l1);
+		});
+		for(Fact fact : subgoalFactsList) {
 			allActions.add(actionsThatAddFactsMutable.get(fact));
 		}
-		Set<Set<Action>> sets = generateAllPossibleSolutions(allActions);
+		List<Set<Action>> sets = generateAllPossibleSolutions(allActions);
 
 		Set<List<Set<Action>>> ret = new HashSet<>();
 		ActionLevel previousActionLevel = actionLevels.get(level - 1);
@@ -245,15 +261,40 @@ public class PlanningGraph {
 //		Logger.debug("Adding NoGoods - Level {} with subgoals {}", level, subgoalFacts);
 	}
 
-	// TODO: our algorithm should work inside here if we want to return just the optimal solution
-	// Use (page 385): 1. Pick first the literal with the highest level cost.
-	// 2. To achieve that literal, prefer actions with easier preconditions. That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
-	private Set<Set<Action>> generateAllPossibleSolutions(Set<List<Action>> allActions) {
+	private List<Set<Action>> generateAllPossibleSolutions(List<List<Action>> allActions) {
 		if(allActions.iterator().hasNext()) {
-			Set<Set<Action>> r = new HashSet<>();
+			List<Set<Action>> r = new ArrayList<>();
 			List<Action> list = allActions.iterator().next();
 			allActions.remove(list);
-			Set<Set<Action>> result = generateAllPossibleSolutions(allActions);
+			List<Set<Action>> result = generateAllPossibleSolutions(allActions);
+
+			// 2. To achieve that literal, prefer actions with easier preconditions.
+			// That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
+			list.sort(new Comparator<Action>() {
+				@Override
+				public int compare(Action a1, Action a2) {
+					Integer l1 = actionCost.get(a1);
+					if(l1 == null) {
+						l1 = 0;
+						for (Fact f : a1.getPreconditions()) {
+							l1 += levelCost.get(f);
+						}
+						actionCost.put(a1, l1);
+					}
+
+					Integer l2 = actionCost.get(a2);
+					if(l2 == null) {
+						l2 = 0;
+						for (Fact f : a2.getPreconditions()) {
+							l2 += levelCost.get(f);
+						}
+						actionCost.put(a2, l2);
+					}
+
+					return l1.compareTo(l2);
+				}
+			});
+
 			for(Action action : list) {
 				Set<Set<Action>> temp = new HashSet<>(result);
 				if(temp.isEmpty()) {
@@ -268,7 +309,7 @@ public class PlanningGraph {
 			}
 			return r;
 		} else {
-			return Collections.emptySet();
+			return Collections.emptyList();
 		}
 	}
 
@@ -282,6 +323,12 @@ public class PlanningGraph {
 
 	private StateLevel getLastStateLevel() {
 		return stateLevels.get(getCurrentLevel());
+	}
+
+	private void populateLevelCost(Set<Fact> facts, int level) {
+		for(Fact fact : facts) {
+			levelCost.putIfAbsent(fact, level);
+		}
 	}
 
 	// For tests
