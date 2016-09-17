@@ -1,26 +1,49 @@
 package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
-import kplanning.plan.ParallelPlan;
-import kplanning.plan.Plan;
+import kplanning.plan.PlanSolution;
 import kplanning.planner.graphplan.PlanningGraph;
+import org.jetbrains.annotations.Nullable;
 
-public class GraphplanPlanner extends Planner {
+// Assumption: Close-world
+public class GraphplanPlanner {
+
+	protected DomainProblemAdapter adapter;
 
 	public GraphplanPlanner(DomainProblemAdapter adapter) {
-		super(adapter);
+		this.adapter = adapter;
 	}
 
-	@Override
-	public Plan plan() {
+	@Nullable
+	public PlanSolution plan() {
+		return plan(false);
+	}
+
+	@Nullable
+	public PlanSolution plan(boolean foundAllSolutions) {
 		PlanningGraph planningGraph = new PlanningGraph(this.adapter);
-		while(!planningGraph.isGoalPossible()) {
+		while(true) {
+			if(planningGraph.isGoalPossible()) {
+				PlanSolution planSolution = planningGraph.extractSolution(foundAllSolutions);
+				if(planSolution != null) {
+					return planSolution;
+				}
+			}
+			if(planningGraph.hasLevelledOff()) {
+				return null;
+			}
 			planningGraph.expandGraph();
 		}
-		System.out.println(planningGraph.toString());
-		System.out.println(planningGraph.isGoalPossible());
-		ParallelPlan parallelPlan = planningGraph.extractSolution();
-		System.out.println(parallelPlan);
-		return null;
+	}
+
+	PlanningGraph getLevelledOffPlanningGraph() {
+		PlanningGraph planningGraph = new PlanningGraph(this.adapter);
+		while(!planningGraph.hasLevelledOff()) {
+			if(planningGraph.isGoalPossible()) {
+				planningGraph.extractSolution(false);
+			}
+			planningGraph.expandGraph();
+		}
+		return planningGraph;
 	}
 }

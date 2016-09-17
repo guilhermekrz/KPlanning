@@ -39,4 +39,13 @@ public class PlanSolutionAdapter {
 		}
 		return set;
 	}
+
+	@Override
+	public String toString() {
+		String s = "Found " + allPlans.size() + " plans:\n";
+		for(Plan plan : allPlans) {
+			s += "\t" + plan + "\n";
+		}
+		return s;
+	}
 }

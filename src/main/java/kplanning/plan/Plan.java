@@ -12,7 +12,7 @@ public class Plan {
 	private List<Action> actions;
 	private List<STRIPSState> states;
 
-	Plan() {
+	private Plan() {
 
 	}
 
@@ -30,7 +30,7 @@ public class Plan {
 		return Plan.newPlanFromActions(actions, adapter);
 	}
 
-	public static Plan newPlanFromOperators(List<Operator> operators, DomainProblemAdapter adapter) {
+	static Plan newPlanFromOperators(List<Operator> operators, DomainProblemAdapter adapter) {
 		Plan plan = new Plan();
 		plan.createPlanWithOperators(operators, adapter);
 		return plan;
@@ -80,6 +80,22 @@ public class Plan {
 	// Assuming that this action is applicable to current state
 	private STRIPSState getNextState(STRIPSState currentState, Action action) {
 		return (STRIPSState) currentState.apply(action);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof Plan)) return false;
+
+		Plan otherObj = (Plan) obj;
+		return otherObj.actions.equals(actions);
+	}
+
+	@Override
+	public int hashCode() {
+		int h = 0;
+		h = 37 * h + actions.hashCode();
+		return h;
 	}
 
 	@Override
