@@ -8,23 +8,21 @@ import org.junit.Test;
 
 import java.util.Set;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-public class GraphplanReachableStatesStrategyTest {
+public class JavagpReachableStatesStrategyTest {
 
-	private GetReachableStatesStrategy strategy;
+	private DomainProblemAdapter adapter1, adapter3;
 
 	@Before
 	public void setup() {
-		strategy = new GraphplanReachableStatesStrategy();
+		adapter1 = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		adapter3 = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 3));
 	}
 
 	@Test
 	public void getReachableStates1() throws Exception {
-		DomainProblemAdapter adapter1 = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
-		Set<STRIPSState> allReachableStates = adapter1.getJavaffParser().getAllReachableStates(strategy);
+		Set<STRIPSState> allReachableStates = adapter1.getJavaffParser().getAllReachableStates(new JavagpReachableStatesStrategy());
 		for(STRIPSState stripsState : allReachableStates) {
 			// TODO: check if inconsistency support is ok
 			System.out.println(stripsState);
@@ -44,8 +42,7 @@ public class GraphplanReachableStatesStrategyTest {
 
 	@Test
 	public void getReachableStates3() throws Exception {
-		DomainProblemAdapter adapter3 = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 3));
-		Set<STRIPSState> allReachableStates = adapter3.getJavaffParser().getAllReachableStates(strategy);
+		Set<STRIPSState> allReachableStates = adapter3.getJavaffParser().getAllReachableStates(new JavagpReachableStatesStrategy());
 		assertEquals(22, allReachableStates.size());
 		assertTrue(allReachableStates.contains(adapter3.getJavaffParser().getStripsState("not at a, not at b, inbar bara, drunk")));
 		assertTrue(allReachableStates.contains(adapter3.getJavaffParser().getStripsState("not at a, not at b, inbar bara, not drunk")));

@@ -1,13 +1,11 @@
 package kplanning.reachableStates;
 
-import graphplan.graph.planning.PlanningGraph;
-import javaff.data.Fact;
 import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
+import kplanning.planner.GraphplanPlanner;
+import kplanning.planner.graphplan.PlanningGraph;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,22 +17,19 @@ public class GraphplanReachableStatesStrategy implements GetReachableStatesStrat
 
 	@Override
 	public Set<STRIPSState> getReachableStates(DomainProblemAdapter adapter) {
-		PlanningGraph levelledPlanningGraph = adapter.getGraphplanAdapter().getGraphplan().getLevelledPlanningGraph();
+		GraphplanPlanner planner = new GraphplanPlanner(adapter);
+		PlanningGraph levelledOffPlanningGraph = planner.getLevelledOffPlanningGraph();
 		Set<STRIPSState> allPossibleStates = adapter.getJavaffParser().getAllPossibleStates();
 		Set<STRIPSState> reachableStates = new HashSet<>();
 		for(STRIPSState state : allPossibleStates) {
-			if(isReachable(adapter, state, levelledPlanningGraph)) {
+			if(isReachable(state, levelledOffPlanningGraph)) {
 				reachableStates.add(state);
 			}
 		}
 		return reachableStates;
 	}
 
-	private boolean isReachable(DomainProblemAdapter adapter, STRIPSState state, PlanningGraph levelledPlanningGraph) {
-		List<graphplan.domain.Proposition> propositions = new ArrayList<>();
-		for(Fact fact : state.getFacts()) {
-			propositions.add(adapter.getGraphplanJavaffConverter().getProposition(fact));
-		}
-		return levelledPlanningGraph.goalsPossible(propositions, levelledPlanningGraph.getLastGraphLevel().getIndex());
+	private boolean isReachable(STRIPSState state, PlanningGraph levelledOffPlanningGraph) {
+		return levelledOffPlanningGraph.isGoalPossible(state.getFacts());
 	}
 }

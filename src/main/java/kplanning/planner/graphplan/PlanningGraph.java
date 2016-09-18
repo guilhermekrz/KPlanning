@@ -64,10 +64,14 @@ public class PlanningGraph {
 
 	public boolean isGoalPossible() {
 		Set<Fact> goalFacts = adapter.getJavaffParser().getGroundProblem().getGoal().getFacts();
-		boolean goalsPossible = getLastStateLevel().getFacts().containsAll(goalFacts)
-				&& !getLastStateLevel().isFactsMutex(goalFacts);
+		boolean goalsPossible = isGoalPossible(goalFacts);
 		Logger.debug("Goals possible at level {}? {}", getCurrentLevel(), goalsPossible);
 		return goalsPossible;
+	}
+
+	public boolean isGoalPossible(Set<Fact> facts) {
+		return getLastStateLevel().getFacts().containsAll(facts)
+				&& !getLastStateLevel().isFactsMutex(facts);
 	}
 
 	public void expandGraph() {
