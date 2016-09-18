@@ -13,12 +13,16 @@ public class GraphplanAdapter {
 	 */
 
 	public static GraphplanAdapter newInstance(DomainProblemAdapter adapter) {
-		return new GraphplanAdapter(adapter);
+		return GraphplanAdapter.newInstance(adapter, false);
 	}
 
-	private GraphplanAdapter(DomainProblemAdapter adapter) {
+	public static GraphplanAdapter newInstance(DomainProblemAdapter adapter, boolean setupLogger) {
+		return new GraphplanAdapter(adapter, setupLogger);
+	}
+
+	private GraphplanAdapter(DomainProblemAdapter adapter, boolean setupLogger) {
 		this.adapter = adapter;
-		graphplan = new graphplan.Graphplan.Builder().setDomainFilename(adapter.getDomainProblem().getDomain()).setProblemFilename(adapter.getDomainProblem().getProblem()).build();
+		graphplan = new graphplan.Graphplan.Builder().setDomainFilename(adapter.getDomainProblem().getDomain()).setSetupLogger(setupLogger).setProblemFilename(adapter.getDomainProblem().getProblem()).build();
 	}
 
 	/**
