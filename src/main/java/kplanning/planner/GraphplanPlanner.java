@@ -36,7 +36,7 @@ public class GraphplanPlanner {
 		}
 	}
 
-	PlanningGraph getLevelledOffPlanningGraph() {
+	public PlanningGraph getLevelledOffPlanningGraph() {
 		PlanningGraph planningGraph = new PlanningGraph(this.adapter);
 		while(!planningGraph.hasLevelledOff()) {
 			if(planningGraph.isGoalPossible()) {

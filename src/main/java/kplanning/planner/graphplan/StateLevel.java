@@ -85,6 +85,17 @@ class StateLevel {
 		return false;
 	}
 
+	boolean isFactsMutex(List<Fact> factsMutex) {
+		for(Fact fact1 : factsMutex) {
+			for(Fact fact2 : factsMutex) {
+				if(isFactMutex(fact1, fact2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean isFactMutex(Fact fact1, Fact fact2) {
 		return mutex[index(fact1)][index(fact2)] != NO_MUTEX || mutex[index(fact2)][index(fact1)] != NO_MUTEX;
 	}

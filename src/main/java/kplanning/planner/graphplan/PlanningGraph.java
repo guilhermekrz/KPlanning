@@ -22,10 +22,15 @@ public class PlanningGraph {
 	private List<StateLevel> stateLevels;
 	private List<ActionLevel> actionLevels;
 	private MutexHelper mutexKeeper;
-	private Set<Pair<Integer, Set<Fact>>> noGoods;
+	private Set<Pair<Integer, List<Fact>>> noGoods;
 	private Map<Integer, Integer> noGoodsCount; // level, no goods count
 	private Map<Fact, Integer> levelCost;
 	private Map<Action, Integer> actionCost;
+
+	private boolean sortFactsByNumberOfGeneratingActions = false;
+	private boolean sortFactsByLevelCost = false; // TODO: check why this is not working for blocks 7
+
+	private boolean sortActionsByActionCost = true;
 
 	public PlanningGraph(DomainProblemAdapter adapter) {
 		this.adapter = adapter;
@@ -163,95 +168,203 @@ public class PlanningGraph {
 	@Nullable
 	public PlanSolution extractSolution(boolean foundAllSolutions) {
 		Set<Fact> subgoalFacts = adapter.getJavaffParser().getGroundProblem().getGoal().getFacts();
-		Set<List<Set<Action>>> solutions = extractSolution(getCurrentLevel(), subgoalFacts, foundAllSolutions);
+		List<Fact> subgoalFactsList = new ArrayList<>(subgoalFacts);
+		sortFacts(foundAllSolutions, getCurrentLevel(), subgoalFactsList);
+		List<List<Set<Action>>> solutions = extractSolution(getCurrentLevel(), new HashSet<>(), new HashSet<>(), subgoalFactsList, foundAllSolutions);
 		if(solutions != null) {
 			Logger.debug("Extract solution FOUND solution at level {}", getCurrentLevel());
-			return new PlanSolution(adapter, solutions);
+			PlanSolution planSolution = new PlanSolution(adapter, solutions);
+			Logger.debug(planSolution);
+			return planSolution;
 		} else {
 			Logger.debug("Extract solution did NOT found solution at level {}", getCurrentLevel());
 			return null;
 		}
 	}
 
-	// TODO: how to guarantee to return the best solution?
+	/**
+	 * Try to find a solution backwards
+	 * Note that this method has two main functions:
+	 * 1) Search backwards
+	 * 2) Generate the set of actions that reaches the current subgoals
+	 *
+	 * First I tried to generate all solutions that reach a certain subgoals, but this was not efficient because:
+	 * a) We first had to generate all possible combinations of actions, which can be huge for high levels;
+	 * b) We could not fully benefit from mutex relations, to prune conflicting set of actions
+	 * So this method became quite a ~mess~, trying to do two functions inside one method.
+	 *
+	 * @param level Current level being searched (starts at 0: stateLevel0, actionLevel0, stateLevel1, actionLevel1,...)
+	 * @param actionSet Actions currently being tried in this level, to reach the current subgoals
+	 * @param mutexSet Actions that can not occur simultaneously with any action in actionSet (we don't need to bother trying with these actions)
+	 * @param subgoalFacts Current subgoals being considered
+	 * @param foundAllSolutions Indicate if we want all possible solutions or not (note that, if we want all solutions, heuristics are not necessary)
+	 * @return A list with all possible solutions, or null if there is no available solution given these constraints
+	 */
 	@Nullable
-	private Set<List<Set<Action>>> extractSolution(int level, Set<Fact> subgoalFacts, boolean foundAllSolutions) {
-		if(level == 0) {
+	private List<List<Set<Action>>> extractSolution(int level, Set<Action> actionSet, Set<Action> mutexSet, List<Fact> subgoalFacts, boolean foundAllSolutions) {
+		if (level == 0) {
+			// If we reached level 0, we just need to check if the initial level has all the subgoals, and return accordingly
 			StateLevel stateLevel = stateLevels.get(level);
-			if(stateLevel.getFacts().containsAll(subgoalFacts)) {
+			if (stateLevel.getFacts().containsAll(subgoalFacts)) {
 				// Goals are possible
-				return Collections.emptySet();
+				return Collections.emptyList();
 			} else {
 				// Goals are not possible
 				return null;
 			}
 		}
 
-		if(noGoods.contains(new Pair<>(level, subgoalFacts))) {
-//			Logger.debug("Pruning NoGoods - Level {} with subgoals {}", level, subgoalFacts);
-			return null;
-		}
+		if(subgoalFacts.isEmpty()) {
+			// When subgoal is empty, it means that we are ready to try to go to the next level (previous level), trying to find a solution backwards
+			List<List<Set<Action>>> solutions = new ArrayList<>();
+			StateLevel currentStateLevel = stateLevels.get(level);
 
-		Map<Fact, List<Action>> actionsThatAddFacts = stateLevels.get(level).getActionsThatAddFacts();
-		Map<Fact, List<Action>> actionsThatAddFactsMutable = new HashMap<>(actionsThatAddFacts);
-		List<List<Action>> allActions = new ArrayList<>();
+			// New subgoals became current actions preconditions (these actions are already conflict-free, so we do not need to check this here)
+			List<Fact> newSubgoalFacts = new ArrayList<>();
+			for (Action action : actionSet) {
+				newSubgoalFacts.addAll(action.getPreconditions());
+			}
 
-		// 1. Pick first the literal with the highest level cost.
-		List<Fact> subgoalFactsList = new ArrayList<>(subgoalFacts);
-		subgoalFactsList.sort((fact1, fact2) -> {
-			Integer l1 = levelCost.get(fact1);
-			Integer l2 = levelCost.get(fact2);
-			return l2.compareTo(l1);
-		});
-		for(Fact fact : subgoalFactsList) {
-			allActions.add(actionsThatAddFactsMutable.get(fact));
-		}
-		List<Set<Action>> sets = generateAllPossibleSolutions(allActions);
+			// We need to check if these new subgoals are not mutex, and also if they are not "noGoods" (if we already failed to find a solution for them for the previous level)
+			if (!currentStateLevel.isFactsMutex(newSubgoalFacts) && !noGoods.contains(new Pair<>(level - 1, newSubgoalFacts))) {
+				// Try to find a solution, in the previous level, for these new subgoals
+				sortFacts(foundAllSolutions, level, newSubgoalFacts);
+				List<List<Set<Action>>> listsFromPreviousLevel = extractSolution(level - 1, new HashSet<>(), new HashSet<>(), newSubgoalFacts, foundAllSolutions);
 
-		Set<List<Set<Action>>> ret = new HashSet<>();
-		ActionLevel previousActionLevel = actionLevels.get(level - 1);
-		StateLevel currentStateLevel = getLastStateLevel();
-
-		for(Set<Action> set : sets) {
-			if(!previousActionLevel.isActionsMutex(set)) {
-				Set<Fact> newSubgoalFacts = new HashSet<>();
-				for (Action action : set) {
-					newSubgoalFacts.addAll(action.getPreconditions());
+				if (listsFromPreviousLevel != null) {
+					// If we have found a solution (or many solutions), add this level action set to the end of each solution (plan)
+					if (listsFromPreviousLevel.isEmpty()) {
+						List<Set<Action>> l = new ArrayList<>();
+						l.add(actionSet);
+						solutions.add(l);
+					} else {
+						for (List<Set<Action>> l : listsFromPreviousLevel) {
+							l.add(actionSet);
+						}
+						solutions.addAll(listsFromPreviousLevel);
+					}
+				} else {
+					// If we have not found a solution, then this new subgoals are "noGoods" at the previous level
+					addNoGood(newSubgoalFacts, level - 1);
 				}
+			}
 
-				if(!currentStateLevel.isFactsMutex(newSubgoalFacts)) {
-					Set<List<Set<Action>>> listsFromPreviousLevel = extractSolution(level - 1, newSubgoalFacts, foundAllSolutions);
-					if (listsFromPreviousLevel != null) {
-						if (listsFromPreviousLevel.isEmpty()) {
-							List<Set<Action>> l = new ArrayList<>();
-							l.add(set);
-							ret.add(l);
-							if(!foundAllSolutions) {
-								break;
-							}
-						} else {
-							for (List<Set<Action>> l : listsFromPreviousLevel) {
-								l.add(set);
-							}
-							ret.addAll(listsFromPreviousLevel);
-							if(!foundAllSolutions) {
-								break;
-							}
+			if (solutions.isEmpty()) {
+				// We haven't found any solution
+				return null;
+			} else {
+				// Returning all found solutions
+				return solutions;
+			}
+		} else {
+			// All found solutions
+			List<List<Set<Action>>> solutions = new ArrayList<>();
+
+			// We need to consider which actions to try
+			ActionLevel previousActionLevel = actionLevels.get(level - 1);
+
+			// Find all actions that reaches first current subgoal
+			Fact firstSubgoal = subgoalFacts.get(0);
+			List<Action> possibleActions = stateLevels.get(level).getActionsThatAddFacts().get(firstSubgoal);
+			sortActions(foundAllSolutions, possibleActions);
+			for (Action possibleAction : possibleActions) {
+				if (!mutexSet.contains(possibleAction)) {
+					// If this actions is not mutex with the previous selected actions, then add this to the new action set and construct a new mutex set
+					Set<Action> newActionSet = new HashSet<>(actionSet);
+					newActionSet.add(possibleAction);
+
+					Set<Action> newMutexSet = new HashSet<>(mutexSet);
+					newMutexSet.addAll(previousActionLevel.getMutex(possibleAction));
+
+					// Get new subgoals based on the effects that this action achieves (or deletes) - a single action can achieve more than one subgoal!
+					List<Fact> newSubgoalSet = getNewSubGoals(possibleAction, subgoalFacts);
+
+					// Call recursively extract solutions, with the smaller new subgoals, and the new action set
+					List<List<Set<Action>>> tempSolutions = extractSolution(level, newActionSet, newMutexSet, newSubgoalSet, foundAllSolutions);
+					if (tempSolutions != null) {
+						solutions.addAll(tempSolutions);
+
+						if(!foundAllSolutions) {
+							return solutions;
 						}
 					}
 				}
 			}
-		}
-
-		if(ret.isEmpty()) {
-			addNoGood(subgoalFacts, level);
-			return null;
-		} else {
-			return ret;
+			if(!solutions.isEmpty()) {
+				return solutions;
+			} else {
+				return null;
+			}
 		}
 	}
 
-	private void addNoGood(Set<Fact> subgoalFacts, int level) {
+	private void sortFacts(boolean foundAllSolutions, int level, List<Fact> subgoalFacts) {
+		if(!foundAllSolutions && (sortFactsByLevelCost || sortFactsByNumberOfGeneratingActions)) {
+			StateLevel stateLevel = stateLevels.get(level);
+			subgoalFacts.sort((fact1, fact2) -> {
+				if(sortFactsByNumberOfGeneratingActions) {
+					if(level != 0) {
+						List<Action> a1 = stateLevel.getActionsThatAddFacts().get(fact1);
+						List<Action> a2 = stateLevel.getActionsThatAddFacts().get(fact2);
+						return Integer.compare(a1.size(), a2.size());
+					} else {
+						return 0;
+					}
+				} else if(sortFactsByLevelCost) {
+					Integer l1 = levelCost.get(fact1);
+					Integer l2 = levelCost.get(fact2);
+					return l2.compareTo(l1);
+				} else {
+					return 0;
+				}
+			});
+		}
+	}
+
+	private void sortActions(boolean foundAllSolutions, List<Action> actions) {
+		// 2. To achieve that literal, prefer actions with easier preconditions.
+		// That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
+		if(!foundAllSolutions && sortActionsByActionCost) {
+			actions.sort((a1, a2) -> {
+				Integer l1 = actionCost.get(a1);
+				if(l1 == null) {
+					l1 = 0;
+					for (Fact f : a1.getPreconditions()) {
+						l1 += levelCost.get(f);
+					}
+					actionCost.put(a1, l1);
+				}
+
+				Integer l2 = actionCost.get(a2);
+				if(l2 == null) {
+					l2 = 0;
+					for (Fact f : a2.getPreconditions()) {
+						l2 += levelCost.get(f);
+					}
+					actionCost.put(a2, l2);
+				}
+				return l1.compareTo(l2);
+			});
+		}
+	}
+
+	private List<Fact> getNewSubGoals(Action action, List<Fact> currentSubgoals) {
+		List<Fact> newSubgoals = new ArrayList<>();
+		for(Fact fact : currentSubgoals) {
+			if(fact instanceof Not) {
+				if(!action.getDeletePropositions().contains(fact)) {
+					newSubgoals.add(fact);
+				}
+			} else {
+				if(!action.getAddPropositions().contains(fact)) {
+					newSubgoals.add(fact);
+				}
+			}
+		}
+		return newSubgoals;
+	}
+
+	private void addNoGood(List<Fact> subgoalFacts, int level) {
 		noGoods.add(new Pair<>(level, subgoalFacts));
 		Integer count = noGoodsCount.get(level);
 		if(count == null) {
@@ -259,58 +372,6 @@ public class PlanningGraph {
 		}
 		noGoodsCount.put(level, count + 1);
 //		Logger.debug("Adding NoGoods - Level {} with subgoals {}", level, subgoalFacts);
-	}
-
-	private List<Set<Action>> generateAllPossibleSolutions(List<List<Action>> allActions) {
-		if(allActions.iterator().hasNext()) {
-			List<Set<Action>> r = new ArrayList<>();
-			List<Action> list = allActions.iterator().next();
-			allActions.remove(list);
-			List<Set<Action>> result = generateAllPossibleSolutions(allActions);
-
-			// 2. To achieve that literal, prefer actions with easier preconditions.
-			// That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
-			list.sort(new Comparator<Action>() {
-				@Override
-				public int compare(Action a1, Action a2) {
-					Integer l1 = actionCost.get(a1);
-					if(l1 == null) {
-						l1 = 0;
-						for (Fact f : a1.getPreconditions()) {
-							l1 += levelCost.get(f);
-						}
-						actionCost.put(a1, l1);
-					}
-
-					Integer l2 = actionCost.get(a2);
-					if(l2 == null) {
-						l2 = 0;
-						for (Fact f : a2.getPreconditions()) {
-							l2 += levelCost.get(f);
-						}
-						actionCost.put(a2, l2);
-					}
-
-					return l1.compareTo(l2);
-				}
-			});
-
-			for(Action action : list) {
-				Set<Set<Action>> temp = new HashSet<>(result);
-				if(temp.isEmpty()) {
-					r.add(new HashSet<>(Collections.singletonList(action)));
-				} else {
-					for (Set<Action> set : temp) {
-						Set<Action> newSet = new HashSet<>(set);
-						newSet.add(action);
-						r.add(newSet);
-					}
-				}
-			}
-			return r;
-		} else {
-			return Collections.emptyList();
-		}
 	}
 
 	/**

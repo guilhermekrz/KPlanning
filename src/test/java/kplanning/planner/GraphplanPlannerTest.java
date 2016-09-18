@@ -2,7 +2,6 @@ package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
 import kplanning.plan.PlanSolution;
-import kplanning.plan.PlanSolutionAdapter;
 import kplanning.planner.graphplan.PlanningGraph;
 import kplanning.util.DomainProblemUtil;
 import org.junit.Test;
@@ -12,32 +11,15 @@ import static org.junit.Assert.assertEquals;
 public class GraphplanPlannerTest {
 
 	@Test
-	public void testPlanBlocksworld0() {
-		assertNumberOfSteps("blocksworld", 0);
+	public void testPlanBlocksworld0to6() {
+		for(int i=0;i<=6;i++) {
+			assertNumberOfSteps("blocksworld", i);
+		}
 	}
 
 	@Test
-	public void testPlanBlocksworld1() {
-		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 1));
-		GraphplanPlanner planner = new GraphplanPlanner(adapter);
-		PlanSolution planSolution = planner.plan();
-		PlanSolutionAdapter planSolution1 = adapter.getGraphplanAdapter().getPlanSolutionAdapter();
-		assertEquals(planSolution.getPlans(), planSolution1.getAllPlans());
-	}
-
-	@Test
-	public void testPlanBlocksworld2() {
-		assertNumberOfSteps("blocksworld", 2);
-	}
-
-	@Test
-	public void testPlanBlocksworld3() {
-		assertNumberOfSteps("blocksworld", 3);
-	}
-
-	@Test
-	public void testPlanBlocksworld4() {
-		assertNumberOfSteps("blocksworld", 4);
+	public void testPlanBlocksworld7() {
+		assertNumberOfSteps("blocksworld", 7);
 	}
 
 	/**
@@ -53,6 +35,47 @@ public class GraphplanPlannerTest {
 	}
 
 	/**
+	 * Found all solutions
+	 */
+
+	@Test
+	public void testAllSolutionsBlocksworld1() {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 1));
+		GraphplanPlanner planner = new GraphplanPlanner(adapter);
+		PlanSolution planSolution1 = planner.plan(true);
+		assert planSolution1 != null;
+		assertEquals(1, planSolution1.getSolutions().size());
+	}
+
+	@Test
+	public void testAllSolutionsBlocksworld2() {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 2));
+		GraphplanPlanner planner = new GraphplanPlanner(adapter);
+		PlanSolution planSolution1 = planner.plan(true);
+		assert planSolution1 != null;
+		assertEquals(4, planSolution1.getSolutions().size());
+	}
+
+	@Test
+	public void testAllSolutionsBlocksworld3() {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 3));
+		GraphplanPlanner planner = new GraphplanPlanner(adapter);
+		PlanSolution planSolution1 = planner.plan(true);
+		assert planSolution1 != null;
+		assertEquals(2, planSolution1.getSolutions().size());
+	}
+
+	// This takes too long
+//	@Test
+//	public void testAllSolutionsBlocksworld4() {
+//		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 4));
+//		GraphplanPlanner planner = new GraphplanPlanner(adapter);
+//		PlanSolution planSolution1 = planner.plan(true);
+//		assert planSolution1 != null;
+//		assertEquals(2, planSolution1.getSolutions().size());
+//	}
+
+	/**
 	 * Utils
 	 */
 
@@ -61,6 +84,7 @@ public class GraphplanPlannerTest {
 		GraphplanPlanner planner = new GraphplanPlanner(adapter);
 		PlanSolution planSolution1 = planner.plan();
 		graphplan.PlanSolution planSolution2 = adapter.getGraphplanAdapter().getPlanSolution();
+		assert planSolution1 != null;
 		assertEquals(planSolution1.getSolutions().size(), planSolution2.getNumberOfHighlevelPlans());
 	}
 }

@@ -14,7 +14,7 @@ public class PlanSolution {
 	private Set<List<Set<Action>>> solutions;
 	private Set<Plan> plans;
 
-	public PlanSolution(DomainProblemAdapter adapter, Set<List<Set<Action>>> solutions) {
+	public PlanSolution(DomainProblemAdapter adapter, List<List<Set<Action>>> solutions) {
 		this.adapter = adapter;
 
 		// Populate solutions without No-Op actions

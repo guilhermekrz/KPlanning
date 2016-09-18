@@ -6,6 +6,7 @@ import javaff.data.strips.Not;
 import kplanning.util.ArrayUtil;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import static kplanning.planner.graphplan.MutexHelper.*;
@@ -52,6 +53,16 @@ class ActionLevel {
 
 	public Set<Action> getActions() {
 		return Collections.unmodifiableSet(actions);
+	}
+
+	public Set<Action> getMutex(Action action) {
+		Set<Action> set = new HashSet<>();
+		for(Action otherAction : this.actions) {
+			if(isActionMutex(action, otherAction)) {
+				set.add(otherAction);
+			}
+		}
+		return set;
 	}
 
 	int getNumberOfMutexes() {
