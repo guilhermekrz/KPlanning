@@ -10,18 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 public class GraphplanPlannerTest {
 
-	@Test
-	public void testPlanBlocksworld0to6() {
-		for(int i=0;i<=6;i++) {
-			assertNumberOfSteps("blocksworld", i);
-		}
-	}
-
-	@Test
-	public void testPlanBlocksworld7() {
-		assertNumberOfSteps("blocksworld", 7);
-	}
-
 	/**
 	 * Levelled off
 	 */
@@ -65,26 +53,13 @@ public class GraphplanPlannerTest {
 		assertEquals(2, planSolution1.getSolutions().size());
 	}
 
-	// This takes too long
-//	@Test
-//	public void testAllSolutionsBlocksworld4() {
-//		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 4));
-//		GraphplanPlanner planner = new GraphplanPlanner(adapter);
-//		PlanSolution planSolution1 = planner.plan(true);
-//		assert planSolution1 != null;
-//		assertEquals(2, planSolution1.getSolutions().size());
-//	}
-
-	/**
-	 * Utils
-	 */
-
-	private void assertNumberOfSteps(String problemName, int problemNumber) {
-		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(problemName, problemNumber));
+	@Test
+	public void testAllSolutionsBlocksworld4() {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 4));
 		GraphplanPlanner planner = new GraphplanPlanner(adapter);
-		PlanSolution planSolution1 = planner.plan();
-		graphplan.PlanSolution planSolution2 = adapter.getGraphplanAdapter().getPlanSolution();
+		PlanSolution planSolution1 = planner.plan(true);
 		assert planSolution1 != null;
-		assertEquals(planSolution1.getSolutions().size(), planSolution2.getNumberOfHighlevelPlans());
+		assertEquals(72, planSolution1.getSolutions().size());
 	}
+
 }

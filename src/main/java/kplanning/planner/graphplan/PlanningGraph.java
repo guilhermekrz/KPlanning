@@ -14,6 +14,13 @@ import org.pmw.tinylog.Logger;
 
 import java.util.*;
 
+// Discuss with Felipe:
+// TODO: how to guarantee to return the best solution?
+// TODO: which heuristics to use?
+// TODO: document requirements (complete README)
+// TODO: Compare with JavaGP
+// TODO: add disjunctive preconditions, conditional effects support?
+// TODO: allow disjuntive goals
 // Assumption: AND goal
 public class PlanningGraph {
 
@@ -22,13 +29,13 @@ public class PlanningGraph {
 	private List<StateLevel> stateLevels;
 	private List<ActionLevel> actionLevels;
 	private MutexHelper mutexKeeper;
-	private Set<Pair<Integer, List<Fact>>> noGoods;
+	private Set<Pair<Integer, Set<Fact>>> noGoods;
 	private Map<Integer, Integer> noGoodsCount; // level, no goods count
 	private Map<Fact, Integer> levelCost;
 	private Map<Action, Integer> actionCost;
 
 	private boolean sortFactsByNumberOfGeneratingActions = false;
-	private boolean sortFactsByLevelCost = false; // TODO: check why this is not working for blocks 7
+	private boolean sortFactsByLevelCost = true;
 
 	private boolean sortActionsByActionCost = true;
 
@@ -70,8 +77,7 @@ public class PlanningGraph {
 	}
 
 	public boolean isGoalPossible(Set<Fact> facts) {
-		return getLastStateLevel().getFacts().containsAll(facts)
-				&& !getLastStateLevel().isFactsMutex(facts);
+		return getLastStateLevel().isGoalPossible(facts);
 	}
 
 	public void expandGraph() {
@@ -79,7 +85,7 @@ public class PlanningGraph {
 		StateLevel previousLevel = getLastStateLevel();
 		Set<Action> applicableActions = new HashSet<>();
 		Set<Fact> applicableActionsEffects = new HashSet<>();
-		Map<Fact, List<Action>> actionsThatAddFact = new HashMap<>();
+		Map<Fact, Set<Action>> actionsThatAddFact = new HashMap<>();
 		for(Action action : actions) {
 			Set<Fact> preconditions = action.getPreconditions();
 			if(previousLevel.getFacts().containsAll(preconditions)) {
@@ -125,11 +131,11 @@ public class PlanningGraph {
 	 * Expand graph utils
 	 */
 
-	private void addNoOpActions(Map<Fact, List<Action>> actionsThatAddFact, Set<Fact> facts) {
+	private void addNoOpActions(Map<Fact, Set<Action>> actionsThatAddFact, Set<Fact> facts) {
 		for(Fact fact : facts) {
-			List<Action> actions = actionsThatAddFact.get(fact);
+			Set<Action> actions = actionsThatAddFact.get(fact);
 			if(actions == null) {
-				actionsThatAddFact.put(fact, new ArrayList<>(Collections.singletonList(getNoOpAction(fact))));
+				actionsThatAddFact.put(fact, new HashSet<>(Collections.singletonList(getNoOpAction(fact))));
 			} else {
 				actions.add(getNoOpAction(fact));
 				actionsThatAddFact.put(fact, actions);
@@ -144,20 +150,20 @@ public class PlanningGraph {
 		return action;
 	}
 
-	private void addActionToActionsThatAddFactMap(Map<Fact, List<Action>> actionsThatAddFact, Action action) {
+	private void addActionToActionsThatAddFactMap(Map<Fact, Set<Action>> actionsThatAddFact, Action action) {
 		for(Fact fact: action.getAddPropositions()) {
-			List<Action> actions = actionsThatAddFact.get(fact);
+			Set<Action> actions = actionsThatAddFact.get(fact);
 			if(actions == null) {
-				actionsThatAddFact.put(fact, new ArrayList<>(Collections.singletonList(action)));
+				actionsThatAddFact.put(fact, new HashSet<>(Collections.singletonList(action)));
 			} else {
 				actions.add(action);
 				actionsThatAddFact.put(fact, actions);
 			}
 		}
 		for(Fact fact: action.getDeletePropositions()) {
-			List<Action> actions = actionsThatAddFact.get(fact);
+			Set<Action> actions = actionsThatAddFact.get(fact);
 			if(actions == null) {
-				actionsThatAddFact.put(fact, new ArrayList<>(Collections.singletonList(action)));
+				actionsThatAddFact.put(fact, new HashSet<>(Collections.singletonList(action)));
 			} else {
 				actions.add(action);
 				actionsThatAddFact.put(fact, actions);
@@ -182,6 +188,7 @@ public class PlanningGraph {
 			return planSolution;
 		} else {
 			Logger.debug("Extract solution did NOT found solution at level {}", getCurrentLevel());
+			addNoGood(subgoalFactsList, getCurrentLevel());
 			return null;
 		}
 	}
@@ -221,7 +228,7 @@ public class PlanningGraph {
 		if(subgoalFacts.isEmpty()) {
 			// When subgoal is empty, it means that we are ready to try to go to the next level (previous level), trying to find a solution backwards
 			List<List<Set<Action>>> solutions = new ArrayList<>();
-			StateLevel currentStateLevel = stateLevels.get(level);
+			StateLevel previousStateLevel = stateLevels.get(level - 1);
 
 			// New subgoals became current actions preconditions (these actions are already conflict-free, so we do not need to check this here)
 			List<Fact> newSubgoalFacts = new ArrayList<>();
@@ -230,9 +237,9 @@ public class PlanningGraph {
 			}
 
 			// We need to check if these new subgoals are not mutex, and also if they are not "noGoods" (if we already failed to find a solution for them for the previous level)
-			if (!currentStateLevel.isFactsMutex(newSubgoalFacts) && !noGoods.contains(new Pair<>(level - 1, newSubgoalFacts))) {
+			if (previousStateLevel.isGoalPossible(newSubgoalFacts) && !isNoGood(newSubgoalFacts, level - 1)) {
 				// Try to find a solution, in the previous level, for these new subgoals
-				sortFacts(foundAllSolutions, level, newSubgoalFacts);
+//				sortFacts(foundAllSolutions, level, newSubgoalFacts);
 				List<List<Set<Action>>> listsFromPreviousLevel = extractSolution(level - 1, new HashSet<>(), new HashSet<>(), newSubgoalFacts, foundAllSolutions);
 
 				if (listsFromPreviousLevel != null) {
@@ -269,8 +276,7 @@ public class PlanningGraph {
 
 			// Find all actions that reaches first current subgoal
 			Fact firstSubgoal = subgoalFacts.get(0);
-			List<Action> possibleActions = stateLevels.get(level).getActionsThatAddFacts().get(firstSubgoal);
-			sortActions(foundAllSolutions, possibleActions);
+			List<Action> possibleActions = stateLevels.get(level).getActionsThatAddFact(firstSubgoal, foundAllSolutions, sortActionsByActionCost, levelCost, actionCost);
 			for (Action possibleAction : possibleActions) {
 				if (!mutexSet.contains(possibleAction)) {
 					// If this actions is not mutex with the previous selected actions, then add this to the new action set and construct a new mutex set
@@ -308,9 +314,7 @@ public class PlanningGraph {
 			subgoalFacts.sort((fact1, fact2) -> {
 				if(sortFactsByNumberOfGeneratingActions) {
 					if(level != 0) {
-						List<Action> a1 = stateLevel.getActionsThatAddFacts().get(fact1);
-						List<Action> a2 = stateLevel.getActionsThatAddFacts().get(fact2);
-						return Integer.compare(a1.size(), a2.size());
+						return Integer.compare(stateLevel.getNumberOfActionsThatAddFact(fact1), stateLevel.getNumberOfActionsThatAddFact(fact2));
 					} else {
 						return 0;
 					}
@@ -321,33 +325,6 @@ public class PlanningGraph {
 				} else {
 					return 0;
 				}
-			});
-		}
-	}
-
-	private void sortActions(boolean foundAllSolutions, List<Action> actions) {
-		// 2. To achieve that literal, prefer actions with easier preconditions.
-		// That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
-		if(!foundAllSolutions && sortActionsByActionCost) {
-			actions.sort((a1, a2) -> {
-				Integer l1 = actionCost.get(a1);
-				if(l1 == null) {
-					l1 = 0;
-					for (Fact f : a1.getPreconditions()) {
-						l1 += levelCost.get(f);
-					}
-					actionCost.put(a1, l1);
-				}
-
-				Integer l2 = actionCost.get(a2);
-				if(l2 == null) {
-					l2 = 0;
-					for (Fact f : a2.getPreconditions()) {
-						l2 += levelCost.get(f);
-					}
-					actionCost.put(a2, l2);
-				}
-				return l1.compareTo(l2);
 			});
 		}
 	}
@@ -368,8 +345,13 @@ public class PlanningGraph {
 		return newSubgoals;
 	}
 
+	private boolean isNoGood(List<Fact> subgoalFacts, int level) {
+		Set<Fact> subgoalFactsSet = new HashSet<>(subgoalFacts);
+		return noGoods.contains(new Pair<>(level, subgoalFactsSet));
+	}
+
 	private void addNoGood(List<Fact> subgoalFacts, int level) {
-		noGoods.add(new Pair<>(level, subgoalFacts));
+		noGoods.add(new Pair<>(level, new HashSet<>(subgoalFacts)));
 		Integer count = noGoodsCount.get(level);
 		if(count == null) {
 			count = 0;
