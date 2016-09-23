@@ -16,6 +16,7 @@ class StateLevel {
 	private int[][] mutex;
 	private int level;
 	private ActionLevel previousActionLevel;
+	private Set<Set<Fact>> noGoods;
 
 	StateLevel(MutexHelper mutexKeeper, Set<Fact> facts) {
 		this(mutexKeeper, 0, facts, null, null);
@@ -29,6 +30,7 @@ class StateLevel {
 		this.actionsThatAddFacts = actionsThatAddFacts;
 		this.sortedActionsThatAddFacts = new HashMap<>();
 		populateMutex();
+		this.noGoods = new HashSet<>();
 	}
 
 	private void populateMutex() {
@@ -69,39 +71,28 @@ class StateLevel {
 		return Collections.unmodifiableSet(facts);
 	}
 
-	List<Action> getActionsThatAddFact(Fact fact, boolean foundAllSolutions, boolean sortActionsByActionCost, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
+	List<Action> getActionsThatAddFact(Fact fact, boolean foundAllSolutions, PlanningGraph.ActionSort actionSort, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
 		if(sortedActionsThatAddFacts.get(fact) == null) {
 			Set<Action> actionSet = actionsThatAddFacts.get(fact);
-			List<Action> actionSetSorted = getSortedActions(foundAllSolutions, actionSet, sortActionsByActionCost, levelCost, actionCost);
+			List<Action> actionSetSorted = getSortedActions(foundAllSolutions, actionSet, actionSort, levelCost, actionCost);
 			sortedActionsThatAddFacts.put(fact, actionSetSorted);
 		}
 		return sortedActionsThatAddFacts.get(fact);
 	}
 
-	private List<Action> getSortedActions(boolean foundAllSolutions, Set<Action> actions, boolean sortActionsByActionCost, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
+	private List<Action> getSortedActions(boolean foundAllSolutions, Set<Action> actions, PlanningGraph.ActionSort actionSort, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
 		// 2. To achieve that literal, prefer actions with easier preconditions.
 		// That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is smallest.
 		List<Action> set = new ArrayList<>(actions);
-		if(!foundAllSolutions && sortActionsByActionCost) {
+		if(!foundAllSolutions && !actionSort.equals(PlanningGraph.ActionSort.NONE)) {
 			set.sort((a1, a2) -> {
-				Integer l1 = actionCost.get(a1);
-				if(l1 == null) {
-					l1 = 0;
-					for (Fact f : a1.getPreconditions()) {
-						l1 += levelCost.get(f);
-					}
-					actionCost.put(a1, l1);
+				if(actionSort.equals(PlanningGraph.ActionSort.ACTION_INDEX)) {
+					return actionCost.get(a1).compareTo(actionCost.get(a2));
+				} else if(actionSort.equals(PlanningGraph.ActionSort.NUMBER_OF_PRECONDITIONS)) {
+					return actionCost.get(a1).compareTo(actionCost.get(a2));
+				} else {
+					return 0;
 				}
-
-				Integer l2 = actionCost.get(a2);
-				if(l2 == null) {
-					l2 = 0;
-					for (Fact f : a2.getPreconditions()) {
-						l2 += levelCost.get(f);
-					}
-					actionCost.put(a2, l2);
-				}
-				return l1.compareTo(l2);
 			});
 		}
 		return set;
@@ -141,6 +132,27 @@ class StateLevel {
 		}
 		return false;
 	}
+
+	/**
+	 * No goods
+	 */
+
+	int getNumberOfNoGoods() {
+		return noGoods.size();
+	}
+
+	boolean isNoGood(List<Fact> subgoalFacts) {
+		return noGoods.contains(new HashSet<>(subgoalFacts));
+	}
+
+	void addNoGood(List<Fact> subgoalFacts) {
+		noGoods.add(new HashSet<>(subgoalFacts));
+//		Logger.debug("Adding NoGoods - Level {} with subgoals {}", level, subgoalFacts);
+	}
+
+	/**
+	 * Utils
+	 */
 
 	private int index(Fact fact) {
 		return mutexKeeper.index(fact);

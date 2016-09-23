@@ -69,17 +69,6 @@ class ActionLevel {
 		return numberOfMutexes;
 	}
 
-	boolean isActionsMutex(Set<Action> actions) {
-		for(Action action1 : actions) {
-			for(Action action2 : actions) {
-				if(isActionMutex(action1, action2)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	boolean isActionMutex(Action action1, Action action2) {
 		return mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] != MutexHelper.NO_MUTEX || mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] != MutexHelper.NO_MUTEX;
 	}

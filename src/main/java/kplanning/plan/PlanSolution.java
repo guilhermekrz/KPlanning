@@ -83,6 +83,7 @@ public class PlanSolution {
 	public String toString() {
 		String s = "Found " + solutions.size() + " high-level solutions:\n";
 		for(List<Set<Action>> solution : solutions) {
+			s += "\t" + solution.size() + " steps: ";
 			for(Set<Action> set : solution) {
 				s += "\t" + set;
 			}
