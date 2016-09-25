@@ -57,6 +57,18 @@ public class PerformanceTest {
 		}
 	}
 
+	@Test
+	public void testJavaffBlocksworld8() {
+		planJavaff("blocksworld", 8);
+	}
+
+	@Test
+	public void testJavaffGraphplanBlocksworld() {
+		for(int i=0;i<=7;i++) {
+			planJavaffGraphplan("blocksworld", i);
+		}
+	}
+
 	/**
 	 * Utils
 	 */
@@ -73,6 +85,10 @@ public class PerformanceTest {
 	}
 
 	private void planJavaff(String problemName, int problemNumber) {
+		new JavaffPlanner(DomainProblemUtil.getDomainProblem(problemName, problemNumber)).plan();
+	}
+
+	private void planJavaffGraphplan(String problemName, int problemNumber) {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(problemName, problemNumber));
 		new JavaffGraphplanPlanner(adapter).plan();
 	}

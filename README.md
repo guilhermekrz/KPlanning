@@ -20,9 +20,9 @@ Currently we are supporting (i.e. encapsulating) the following:
     
 Performance tests (in ms)
         
-| Problem/Planner       | Graphplan | JavaGP | JavaFF Graphplan |
-| -------------         |:---------:|:------:|:----------------:|
-| Blocksworld (1 to 7)  | 3036      | 1196   | 8617             |
-| Blocksworld 8         | 4788      | 1329   | NC               |
+| Problem/Planner       | Graphplan | JavaGP | JavaFF Graphplan | JavaFF |
+| -------------         |:---------:|:------:|:----------------:|:------:|
+| Blocksworld (1 to 7)  | 3036      | 1196   | 8617             | 330    |
+| Blocksworld 8         | 4788      | 1329   | NC               | 680    |
 
 NC = Not completed in 30 minutes
