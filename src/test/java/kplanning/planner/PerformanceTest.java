@@ -2,32 +2,59 @@ package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
 import kplanning.util.DomainProblemUtil;
+import org.junit.Before;
+import org.junit.Test;
 
-// TODO: add a flag to run/not run this
+import static org.junit.Assume.assumeTrue;
+
 public class PerformanceTest {
 
-//	@Test
+	@Before
+	public void setup() {
+		assumeTrue(TestConfig.RUN_PERFORMANCE_TESTS);
+	}
+
+	/**
+	 * Graphplan
+	 */
+
+	@Test
 	public void testGraphplanBlocksworld() {
 		for(int i=0;i<=7;i++) {
 			planGraphplan("blocksworld", i);
 		}
 	}
 
-//	@Test
+	@Test
 	public void testGraphplanBlocksworld8() {
 		planGraphplan("blocksworld", 8);
 	}
 
-//	@Test
+	/**
+	 * JavaGP
+	 */
+
+	@Test
 	public void testJavagpBlocksworld() {
 		for(int i=0;i<=7;i++) {
 			planJavagp("blocksworld", i);
 		}
 	}
 
-//	@Test
+	@Test
 	public void testJavagpBlocksworld8() {
 		planJavagp("blocksworld", 8);
+	}
+
+	/**
+	 * JavaFF
+	 */
+
+	@Test
+	public void testJavaffBlocksworld() {
+		for(int i=0;i<=7;i++) {
+			planJavaff("blocksworld", i);
+		}
 	}
 
 	/**
@@ -43,5 +70,10 @@ public class PerformanceTest {
 	private void planJavagp(String problemName, int problemNumber) {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(problemName, problemNumber));
 		adapter.getGraphplanAdapter().getPlanSolution();
+	}
+
+	private void planJavaff(String problemName, int problemNumber) {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(problemName, problemNumber));
+		new JavaffGraphplanPlanner(adapter).plan();
 	}
 }
