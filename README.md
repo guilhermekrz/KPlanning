@@ -8,12 +8,13 @@ Important to note that the main idea is to use JavaFF data structure as a base, 
 
 Currently we are supporting (i.e. encapsulating) the following:
 
-* Parsers
+* Parser
     * [PDDL4J](https://github.com/pellierd/pddl4j)
     * [JavaFF](https://github.com/guilhermekrz/JavaFF)
     * Including a class to convert some objects from PDDL4J to JavaFF.
 
-* Planners
+* Planner
+    * BFS search using BitSet
     * Graphplan (our implementation)
     * [JavaGP](https://github.com/pucrs-automated-planning/javagp)
     * [JavaFF Graphplan](https://github.com/guilhermekrz/JavaFF)
@@ -26,3 +27,10 @@ Performance tests (in ms)
 | Blocksworld 8         | 4788      | 1329   | NC               | 680    |
 
 NC = Not completed in 30 minutes
+
+* Norm parser
+    * Conditional norm
+    * LTL norm
+    
+* Problem generator
+* Retrieve reachable states

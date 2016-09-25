@@ -15,7 +15,6 @@ import org.pmw.tinylog.Logger;
 import java.util.*;
 
 // TODO: document requirements (complete README)
-// TODO: Compare with JavaGP
 // TODO: add disjunctive preconditions, conditional effects support?
 // TODO: allow disjuntive goals
 // Assumption: AND goal
