@@ -107,7 +107,7 @@ class StateLevel {
 				&& !isFactsMutex(goalFacts);
 	}
 
-	private boolean isFactsMutex(Collection<Fact> factsMutex) {
+	boolean isFactsMutex(Collection<Fact> factsMutex) {
 		for(Fact fact1 : factsMutex) {
 			for(Fact fact2 : factsMutex) {
 				if(isFactMutex(fact1, fact2)) {

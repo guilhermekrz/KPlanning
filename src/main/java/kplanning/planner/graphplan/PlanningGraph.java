@@ -86,7 +86,7 @@ public class PlanningGraph {
 		Map<Fact, Set<Action>> actionsThatAddFact = new HashMap<>();
 		for(Action action : actions) {
 			Set<Fact> preconditions = action.getPreconditions();
-			if(previousLevel.getFacts().containsAll(preconditions)) {
+			if(previousLevel.getFacts().containsAll(preconditions) && !previousLevel.isFactsMutex(preconditions)) {
 				applicableActions.add(action);
 				applicableActionsEffects.addAll(action.getAddPropositions());
 				applicableActionsEffects.addAll(action.getDeletePropositions());
