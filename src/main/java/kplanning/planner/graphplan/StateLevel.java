@@ -71,7 +71,11 @@ class StateLevel {
 		return Collections.unmodifiableSet(facts);
 	}
 
-	List<Action> getActionsThatAddFact(Fact fact, boolean foundAllSolutions, PlanningGraph.ActionSort actionSort, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
+	Set<Action> getActionsThatAddFact(Fact fact) {
+		return actionsThatAddFacts.get(fact);
+	}
+
+	List<Action> getSortedActionsThatAddFact(Fact fact, boolean foundAllSolutions, PlanningGraph.ActionSort actionSort, Map<Fact, Integer> levelCost, Map<Action, Integer> actionCost) {
 		if(sortedActionsThatAddFacts.get(fact) == null) {
 			Set<Action> actionSet = actionsThatAddFacts.get(fact);
 			List<Action> actionSetSorted = getSortedActions(foundAllSolutions, actionSet, actionSort, levelCost, actionCost);

@@ -55,7 +55,7 @@ class ActionLevel {
 		return Collections.unmodifiableSet(actions);
 	}
 
-	public Set<Action> getMutex(Action action) {
+	Set<Action> getMutex(Action action) {
 		Set<Action> set = new HashSet<>();
 		for(Action otherAction : this.actions) {
 			if(isActionMutex(action, otherAction)) {

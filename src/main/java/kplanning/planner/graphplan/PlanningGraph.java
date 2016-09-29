@@ -270,7 +270,7 @@ public class PlanningGraph {
 
 			// Find all actions that reaches first current subgoal
 			Fact firstSubgoal = subgoalFacts.get(0);
-			List<Action> possibleActions = stateLevels.get(level).getActionsThatAddFact(firstSubgoal, foundAllSolutions, actionSort, levelCost, actionCost);
+			List<Action> possibleActions = stateLevels.get(level).getSortedActionsThatAddFact(firstSubgoal, foundAllSolutions, actionSort, levelCost, actionCost);
 //			System.out.println(level + " " + firstSubgoal + " - subgoals size: " + subgoalFacts.size() + " - action set: " + actionSet);
 			for (Action possibleAction : possibleActions) {
 				if (!mutexSet.contains(possibleAction)) {
@@ -283,6 +283,11 @@ public class PlanningGraph {
 
 					// Get new subgoals based on the effects that this action achieves (or deletes) - a single action can achieve more than one subgoal!
 					List<Fact> newSubgoalSet = getNewSubGoals(possibleAction, subgoalFacts);
+
+					if(needToBackUp(level, newSubgoalSet, newMutexSet)) {
+						// There is no way to extract a solution with this selected action
+						continue;
+					}
 
 					// Call recursively extract solutions, with the smaller new subgoals, and the new action set
 					List<List<Set<Action>>> tempSolutions = extractSolution(level, newActionSet, newMutexSet, newSubgoalSet, foundAllSolutions);
@@ -351,7 +356,19 @@ public class PlanningGraph {
 		return newSubgoals;
 	}
 
-
+	// Perform forward-checking (pg 289 of "Fast planning through planning graph analysis)
+	private boolean needToBackUp(int level, List<Fact> newSubgoalSet, Set<Action> newMutexSet) {
+		for(Fact f : newSubgoalSet) {
+			Set<Action> actionsThatAddFact = stateLevels.get(level).getActionsThatAddFact(f);
+			Set<Action> a = new HashSet<>(actionsThatAddFact);
+			a.removeAll(newMutexSet);
+			if(a.isEmpty()) {
+				// All the actions creating this subgoal are exclusive of actions we have currently selected (use new mutex set)
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Utils
