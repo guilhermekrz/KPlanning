@@ -30,6 +30,15 @@ public class PerformanceTest {
 		planGraphplan("blocksworld", 8);
 	}
 
+	@Test
+	public void testGraphplanDwr2to6Minus5() {
+		for(int i=2;i<=6;i++) {
+			if(i != 5) {
+				planGraphplan("dwr", i);
+			}
+		}
+	}
+
 	/**
 	 * JavaGP
 	 */
@@ -46,6 +55,15 @@ public class PerformanceTest {
 		planJavagp("blocksworld", 8);
 	}
 
+	@Test
+	public void testJavagpDwr2to6Minus5() {
+		for(int i=2;i<=6;i++) {
+			if(i != 5) {
+				planJavagp("dwr", i);
+			}
+		}
+	}
+
 	/**
 	 * JavaFF
 	 */
@@ -60,6 +78,15 @@ public class PerformanceTest {
 	@Test
 	public void testJavaffBlocksworld8() {
 		planJavaff("blocksworld", 8);
+	}
+
+	@Test
+	public void testJavaffDwr2to6Minus5() {
+		for(int i=2;i<=6;i++) {
+			if(i != 5) {
+				planJavaff("dwr", i);
+			}
+		}
 	}
 
 	@Test

@@ -17,6 +17,7 @@ import java.util.*;
 // TODO: document requirements (complete README)
 // TODO: add disjunctive preconditions, conditional effects support?
 // TODO: allow disjuntive goals
+// TODO: make a lifted planner? make a bitset planner?
 // Assumption: AND goal
 public class PlanningGraph {
 

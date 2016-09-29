@@ -16,7 +16,6 @@ class ActionLevel {
 	private MutexHelper mutexKeeper;
 	private Set<Action> actions;
 	private static int[][] basicActionMutex;
-	private static int numberOfBasicMutexes;
 	private int[][] mutex;
 	private int numberOfMutexes;
 	private int level;
@@ -34,18 +33,19 @@ class ActionLevel {
 
 	private void populateMutex() {
 		mutex = getBasicActionMutex();
-		numberOfMutexes = numberOfBasicMutexes;
+		numberOfMutexes = 0;
 
 		// The only action mutex that can exists, besides the basic action mutexes, are COMPETING_NEEDS mutexes due to Fact mutexes in this state level
 		for(Action action1 : actions) {
 			for (Action action2 : actions) {
-				if(previousStateLevel.hasCompetingNeeds(action1, action2)) {
-					if(mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] == NO_MUTEX) {
-						// This is not a basic mutex, so increment one mutex
+				if(!action1.equals(action2)) {
+					if (previousStateLevel.hasCompetingNeeds(action1, action2)) {
+						mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] = mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] | COMPETING_NEEDS;
+						mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] = mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] | COMPETING_NEEDS;
+						numberOfMutexes++;
+					} else if (mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] != NO_MUTEX) {
 						numberOfMutexes++;
 					}
-					mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] = mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] | COMPETING_NEEDS;
-					mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] = mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] | COMPETING_NEEDS;
 				}
 			}
 		}
@@ -83,29 +83,21 @@ class ActionLevel {
 
 	private void populateBasicActionMutex(Set<Action> actions) {
 		basicActionMutex = new int[actions.size()][actions.size()];
-		numberOfBasicMutexes = 0;
 		// TODO: we could construct a mutex with size*size/2 cells...
 		for(Action action1 : actions) {
 			for(Action action2 : actions) {
 				if(!action1.equals(action2)) {
-					boolean shouldAdd = false;
 					if(hasInconsistentEffects(action1, action2)) {
-						shouldAdd = true;
 						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | INCONSISTENT_EFFECTS;
 						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | INCONSISTENT_EFFECTS;
 					}
 					if(hasInterference(action1, action2)) {
-						shouldAdd = true;
 						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | INTERFERENCE;
 						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | INTERFERENCE;
 					}
 					if(this.previousStateLevel.hasCompetingNeeds(action1, action2)) {
-						shouldAdd = true;
 						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | COMPETING_NEEDS;
 						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | COMPETING_NEEDS;
-					}
-					if(shouldAdd) {
-						numberOfBasicMutexes++;
 					}
 				}
 			}
