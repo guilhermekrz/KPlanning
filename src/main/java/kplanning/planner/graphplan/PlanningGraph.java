@@ -33,7 +33,6 @@ public class PlanningGraph {
 	private Set<Action> actions;
 	private List<StateLevel> stateLevels;
 	private List<ActionLevel> actionLevels;
-	private MutexHelper mutexKeeper;
 	private Map<Fact, Integer> levelCost;
 	private Map<Action, Integer> actionCost;
 
@@ -45,7 +44,6 @@ public class PlanningGraph {
 		stateLevels = new ArrayList<>();
 		actionLevels = new ArrayList<>();
 		populateActions();
-		mutexKeeper = new MutexHelper(adapter, actions);
 		levelCost = new HashMap<>();
 		actionCost = new HashMap<>();
 		addInitialLevel();
@@ -63,7 +61,7 @@ public class PlanningGraph {
 
 	private void addInitialLevel() {
 		Set<Fact> initialStateFacts = adapter.getJavaffParser().getCompleteInitState().getFacts();
-		stateLevels.add(new StateLevel(mutexKeeper, initialStateFacts));
+		stateLevels.add(new StateLevel(initialStateFacts, adapter));
 		populateLevelCost(initialStateFacts, getCurrentLevel());
 
 	}
@@ -105,13 +103,13 @@ public class PlanningGraph {
 				}
 			}
 		}
-		ActionLevel actionLevel = new ActionLevel(getLastStateLevel(), mutexKeeper, getCurrentLevel(), applicableActions, this.actions);
+		ActionLevel actionLevel = new ActionLevel(getLastStateLevel(), getCurrentLevel(), applicableActions, this.actions);
 		actionLevels.add(actionLevel);
 
 		Set<Fact> nextLevelFacts = new HashSet<>();
 		nextLevelFacts.addAll(previousLevel.getFacts());
 		nextLevelFacts.addAll(applicableActionsEffects);
-		StateLevel nextLevel = new StateLevel(mutexKeeper, getCurrentLevel() + 1, nextLevelFacts, actionsThatAddFact, actionLevel);
+		StateLevel nextLevel = new StateLevel(getCurrentLevel() + 1, nextLevelFacts, actionsThatAddFact, actionLevel, adapter);
 		stateLevels.add(nextLevel);
 		populateLevelCost(nextLevelFacts, getCurrentLevel());
 	}
@@ -129,8 +127,8 @@ public class PlanningGraph {
 		ActionLevel previousActionLevel = actionLevels.get(actionLevels.size() - 2);
 		ActionLevel currentActionLevel = actionLevels.get(actionLevels.size() - 1);
 
-		boolean hasLevelledOff = (previousStateLevel.getNumberOfNoGoods() == currentStateLevel.getNumberOfNoGoods())
-				&& (previousActionLevel.getNumberOfMutexes() == currentActionLevel.getNumberOfMutexes());
+		boolean hasLevelledOff = (previousStateLevel.getNumberOfNoGoods() == currentStateLevel.getNumberOfNoGoods()
+				&& (previousActionLevel.getNumberOfMutexes() == currentActionLevel.getNumberOfMutexes()));
 		Logger.debug("Graph has levelled off at level {}? {} - # noGoods  {} -> {} - # mutex {} -> {}",
 				getCurrentLevel(), hasLevelledOff, previousStateLevel.getNumberOfNoGoods(), currentStateLevel.getNumberOfNoGoods(),
 				previousActionLevel.getNumberOfMutexes(), currentActionLevel.getNumberOfMutexes());

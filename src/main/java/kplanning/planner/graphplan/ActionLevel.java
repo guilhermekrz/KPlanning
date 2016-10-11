@@ -3,101 +3,82 @@ package kplanning.planner.graphplan;
 import javaff.data.Action;
 import javaff.data.Fact;
 import javaff.data.strips.Not;
-import kplanning.util.ArrayUtil;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import static kplanning.planner.graphplan.MutexHelper.*;
+import java.util.*;
 
 class ActionLevel {
 	private StateLevel previousStateLevel;
-	private MutexHelper mutexKeeper;
 	private Set<Action> actions;
-	private static int[][] basicActionMutex;
-	private int[][] mutex;
-	private int numberOfMutexes;
+	private Map<Action, Set<Action>> mutexes; // TODO: store only mutexes in sorted order?
+	private static Map<Action, Set<Action>> staticMutexes;
 	private int level;
 
-	ActionLevel(StateLevel previousStateLevel, MutexHelper mutexKeeper, int level, Set<Action> applicableActions, Set<Action> allActions) {
+	ActionLevel(StateLevel previousStateLevel, int level, Set<Action> applicableActions, Set<Action> allActions) {
 		this.previousStateLevel = previousStateLevel;
-		this.mutexKeeper = mutexKeeper;
 		this.level = level;
+		this.mutexes = new HashMap<>();
 		this.actions = applicableActions;
 		if(this.level == 0) {
-			populateBasicActionMutex(allActions);
+			populateStaticActionMutex(allActions);
 		}
 		populateMutex();
 	}
 
-	private void populateMutex() {
-		mutex = getBasicActionMutex();
-		numberOfMutexes = 0;
+	/**
+	 * Mutexes
+	 */
 
+	boolean isActionMutex(Action action1, Action action2) {
+		return mutexes.containsKey(action1) && mutexes.get(action1).contains(action2);
+	}
+
+	Set<Action> getMutex(Action action) {
+		return this.mutexes.containsKey(action)? this.mutexes.get(action) : Collections.emptySet();
+	}
+
+	int getNumberOfMutexes() {
+		int res = 0;
+		for (Set<Action> mutex : mutexes.values()) {
+			res += mutex.size();
+		}
+		return res;
+	}
+
+	private void populateMutex() {
 		// The only action mutex that can exists, besides the basic action mutexes, are COMPETING_NEEDS mutexes due to Fact mutexes in this state level
-		for(Action action1 : actions) {
-			for (Action action2 : actions) {
+		for(Action action1 : this.actions) {
+			for (Action action2 : this.actions) {
 				if(!action1.equals(action2)) {
-					if (previousStateLevel.hasCompetingNeeds(action1, action2)) {
-						mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] = mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] | COMPETING_NEEDS;
-						mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] = mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] | COMPETING_NEEDS;
-						numberOfMutexes++;
-					} else if (mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] != NO_MUTEX) {
-						numberOfMutexes++;
+					if(staticMutexes.containsKey(action1) && staticMutexes.get(action1).contains(action2)) {
+						addMutex(action1, action2);
+					} else if (previousStateLevel.hasCompetingNeeds(action1, action2)) {
+						addMutex(action1, action2);
 					}
 				}
 			}
 		}
 	}
 
-	public Set<Action> getActions() {
-		return Collections.unmodifiableSet(actions);
-	}
-
-	Set<Action> getMutex(Action action) {
-		Set<Action> set = new HashSet<>();
-		for(Action otherAction : this.actions) {
-			if(isActionMutex(action, otherAction)) {
-				set.add(otherAction);
-			}
+	private void addMutex(Action action1, Action action2) {
+		if(!this.mutexes.containsKey(action1)) {
+			this.mutexes.put(action1, new HashSet<>(Collections.singletonList(action2)));
+		} else {
+			this.mutexes.get(action1).add(action2);
 		}
-		return set;
 	}
 
-	int getNumberOfMutexes() {
-		return numberOfMutexes;
-	}
+	private void populateStaticActionMutex(Set<Action> allActions) {
+		staticMutexes = new HashMap<>();
 
-	boolean isActionMutex(Action action1, Action action2) {
-		return mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] != MutexHelper.NO_MUTEX || mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] != MutexHelper.NO_MUTEX;
-	}
-
-	/**
-	 * Basic action mutex
-	 */
-
-	private int[][] getBasicActionMutex() {
-		return ArrayUtil.cloneArray(basicActionMutex);
-	}
-
-	private void populateBasicActionMutex(Set<Action> actions) {
-		basicActionMutex = new int[actions.size()][actions.size()];
-		// TODO: we could construct a mutex with size*size/2 cells...
-		for(Action action1 : actions) {
-			for(Action action2 : actions) {
+		for(Action action1 : allActions) {
+			for(Action action2 : allActions) {
 				if(!action1.equals(action2)) {
-					if(hasInconsistentEffects(action1, action2)) {
-						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | INCONSISTENT_EFFECTS;
-						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | INCONSISTENT_EFFECTS;
-					}
-					if(hasInterference(action1, action2)) {
-						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | INTERFERENCE;
-						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | INTERFERENCE;
-					}
-					if(this.previousStateLevel.hasCompetingNeeds(action1, action2)) {
-						basicActionMutex[index(action1)][index(action2)] = basicActionMutex[index(action1)][index(action2)] | COMPETING_NEEDS;
-						basicActionMutex[index(action2)][index(action1)] = basicActionMutex[index(action2)][index(action1)] | COMPETING_NEEDS;
+					if(hasInconsistentEffects(action1, action2) || hasInterference(action1, action2) || this.previousStateLevel.hasCompetingNeeds(action1, action2)) {
+						if(!staticMutexes.containsKey(action1)) {
+							staticMutexes.put(action1, new HashSet<>(Collections.singletonList(action2)));
+						} else {
+							staticMutexes.get(action1).add(action2);
+						}
 					}
 				}
 			}
@@ -151,25 +132,8 @@ class ActionLevel {
 		return false;
 	}
 
-	private int index(Action action) {
-		return mutexKeeper.index(action);
-	}
-
 	@Override
 	public String toString() {
 		return actions.toString();
-	}
-
-	// For test purposes
-	boolean isInconsistentEffectsMutex(Action action1, Action action2) {
-		return ((mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] & INCONSISTENT_EFFECTS) != 0) || ((mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] & INCONSISTENT_EFFECTS) != 0);
-	}
-
-	boolean isInterferenceMutex(Action action1, Action action2) {
-		return ((mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] & INTERFERENCE) != 0) || ((mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] & INTERFERENCE) != 0);
-	}
-
-	boolean isCompetingNeedsMutex(Action action1, Action action2) {
-		return ((mutex[mutexKeeper.index(action1)][mutexKeeper.index(action2)] & COMPETING_NEEDS) != 0) || ((mutex[mutexKeeper.index(action2)][mutexKeeper.index(action1)] & COMPETING_NEEDS) != 0);
 	}
 }

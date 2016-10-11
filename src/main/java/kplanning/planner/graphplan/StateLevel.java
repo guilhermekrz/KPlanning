@@ -2,74 +2,66 @@ package kplanning.planner.graphplan;
 
 import javaff.data.Action;
 import javaff.data.Fact;
+import javaff.data.strips.Not;
+import kplanning.DomainProblemAdapter;
 
 import java.util.*;
 
-import static kplanning.planner.graphplan.MutexHelper.INCONSISTENT_SUPPORT;
-import static kplanning.planner.graphplan.MutexHelper.NO_MUTEX;
-
 class StateLevel {
-	private MutexHelper mutexKeeper;
 	private Set<Fact> facts;
 	private Map<Fact, Set<Action>> actionsThatAddFacts;
 	private Map<Fact, List<Action>> sortedActionsThatAddFacts;
-	private int[][] mutex;
 	private int level;
 	private ActionLevel previousActionLevel;
 	private Set<Set<Fact>> noGoods;
+	private Map<Fact, Set<Fact>> mutexes;
+	private static Map<Fact, Set<Fact>> staticMutexes;
 
-	StateLevel(MutexHelper mutexKeeper, Set<Fact> facts) {
-		this(mutexKeeper, 0, facts, null, null);
+	StateLevel(Set<Fact> facts, DomainProblemAdapter adapter) {
+		this(0, facts, null, null, adapter);
 	}
 
-	StateLevel(MutexHelper mutexKeeper, int level, Set<Fact> facts, Map<Fact, Set<Action>> actionsThatAddFacts, ActionLevel previousActionLevel) {
-		this.mutexKeeper = mutexKeeper;
+	StateLevel(int level, Set<Fact> facts, Map<Fact, Set<Action>> actionsThatAddFacts, ActionLevel previousActionLevel, DomainProblemAdapter adapter) {
 		this.previousActionLevel = previousActionLevel;
 		this.level = level;
 		this.facts = facts;
+		this.mutexes = new HashMap<>();
 		this.actionsThatAddFacts = actionsThatAddFacts;
 		this.sortedActionsThatAddFacts = new HashMap<>();
+		if(this.level == 0) {
+			populateStaticFactMutex(adapter);
+		}
 		populateMutex();
 		this.noGoods = new HashSet<>();
-	}
-
-	private void populateMutex() {
-		mutex = mutexKeeper.getBasicFactMutex();
-		// TODO: we could construct a mutex with size*size/2 cells...
-		if(level != 0) {
-			for (Fact fact1 : facts) {
-				for (Fact fact2 : facts) {
-					if (!fact1.equals(fact2)) {
-						Set<Action> actions1 = actionsThatAddFacts.get(fact1);
-						Set<Action> actions2 = actionsThatAddFacts.get(fact2);
-
-						boolean isMutex = true;
-						for (Action a1 : actions1) {
-							for (Action a2 : actions2) {
-								if (!previousActionLevel.isActionMutex(a1, a2)) {
-									// Found a pair of actions that adds these facts, so they are not mutex
-									isMutex = false;
-									break;
-								}
-							}
-							if (!isMutex) {
-								break;
-							}
-						}
-
-						if (isMutex) {
-							mutex[index(fact1)][index(fact2)] = mutex[index(fact1)][index(fact2)] | INCONSISTENT_SUPPORT;
-							mutex[index(fact2)][index(fact1)] = mutex[index(fact2)][index(fact1)] | INCONSISTENT_SUPPORT;
-						}
-					}
-				}
-			}
-		}
 	}
 
 	Set<Fact> getFacts() {
 		return Collections.unmodifiableSet(facts);
 	}
+
+	boolean isGoalPossible(Collection<Fact> goalFacts) {
+		return this.facts.containsAll(goalFacts)
+				&& !isFactsMutex(goalFacts);
+	}
+
+	boolean isFactsMutex(Collection<Fact> factsMutex) {
+		for(Fact fact1 : factsMutex) {
+			for(Fact fact2 : factsMutex) {
+				if(isFactMutex(fact1, fact2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isFactMutex(Fact fact1, Fact fact2) {
+		return mutexes.containsKey(fact1) && mutexes.get(fact1).contains(fact2);
+	}
+
+	/**
+	 * Actions that add facts
+	 */
 
 	Set<Action> getActionsThatAddFact(Fact fact) {
 		return actionsThatAddFacts.get(fact);
@@ -106,30 +98,64 @@ class StateLevel {
 		return actionsThatAddFacts.get(fact).size();
 	}
 
-	boolean isGoalPossible(Collection<Fact> goalFacts) {
-		return this.facts.containsAll(goalFacts)
-				&& !isFactsMutex(goalFacts);
-	}
+	/**
+	 * Mutexes
+	 */
 
-	boolean isFactsMutex(Collection<Fact> factsMutex) {
-		for(Fact fact1 : factsMutex) {
-			for(Fact fact2 : factsMutex) {
-				if(isFactMutex(fact1, fact2)) {
-					return true;
+	private void populateMutex() {
+		for(Fact fact1 : facts) {
+			for(Fact fact2 : facts) {
+				if(!fact1.equals(fact2)) {
+					if(staticMutexes.containsKey(fact1) && staticMutexes.get(fact1).contains(fact2)) {
+						addMutex(fact1, fact2);
+					} else if(level != 0) {
+						Set<Action> actions1 = actionsThatAddFacts.get(fact1);
+						Set<Action> actions2 = actionsThatAddFacts.get(fact2);
+
+						boolean isMutex = true;
+						for (Action a1 : actions1) {
+							for (Action a2 : actions2) {
+								if (!previousActionLevel.isActionMutex(a1, a2)) {
+									// Found a pair of actions that adds these facts, so they are not mutex
+									isMutex = false;
+									break;
+								}
+							}
+							if (!isMutex) {
+								break;
+							}
+						}
+
+						if (isMutex) {
+							addMutex(fact1, fact2);
+						}
+					}
 				}
 			}
 		}
-		return false;
 	}
 
-	private boolean isFactMutex(Fact fact1, Fact fact2) {
-		return mutex[index(fact1)][index(fact2)] != NO_MUTEX || mutex[index(fact2)][index(fact1)] != NO_MUTEX;
+	private void addMutex(Fact fact1, Fact fact2) {
+		if(!this.mutexes.containsKey(fact1)) {
+			this.mutexes.put(fact1, new HashSet<>(Collections.singletonList(fact2)));
+		} else {
+			this.mutexes.get(fact1).add(fact2);
+		}
+	}
+
+	private void populateStaticFactMutex(DomainProblemAdapter adapter) {
+		staticMutexes = new HashMap<>();
+
+		for(Fact fact : adapter.getJavaffParser().getGroundedPropositions()) {
+			staticMutexes.put(fact, new HashSet<>(Collections.singletonList(new Not(fact))));
+			staticMutexes.put(new Not(fact), new HashSet<>(Collections.singletonList(fact)));
+		}
 	}
 
 	boolean hasCompetingNeeds(Action action1, Action action2) {
 		for(Fact fact1 : action1.getPreconditions()) {
 			for(Fact fact2 : action2.getPreconditions()) {
-				if(mutex[index(fact1)][index(fact2)] != NO_MUTEX || mutex[index(fact2)][index(fact1)] != NO_MUTEX) {
+				if(isFactMutex(fact1, fact2)) {
 					return true;
 				}
 			}
@@ -157,10 +183,6 @@ class StateLevel {
 	/**
 	 * Utils
 	 */
-
-	private int index(Fact fact) {
-		return mutexKeeper.index(fact);
-	}
 
 	@Override
 	public String toString() {
