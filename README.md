@@ -23,9 +23,9 @@ Performance tests (in ms)
         
 | Problem/Planner       | Graphplan | JavaGP | JavaFF Graphplan | JavaFF |
 | -------------         |:---------:|:------:|:----------------:|:------:|
-| Blocksworld (1 to 7)  | 2600      | 1196   | 8617             | 330    |
-| Blocksworld 8         | 3600      | 1329   | NC               | 680    |
-| DWR (2 to 6 - 5)      | 78000     | 10000  | -                | 650    |
+| Blocksworld (1 to 7)  | 1800      | 1196   | 8617             | 330    |
+| Blocksworld 8         | 2200      | 1329   | NC               | 680    |
+| DWR (2 to 6 - 5)      | 18000     | 10000  | -                | 650    |
 
 NC = Not completed in 30 minutes
 
