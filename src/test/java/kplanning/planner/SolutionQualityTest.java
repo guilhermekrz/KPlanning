@@ -31,7 +31,7 @@ public class SolutionQualityTest {
 		PlanSolution planSolution1 = planner.plan();
 		graphplan.PlanSolution planSolution2 = adapter.getGraphplanAdapter().getPlanSolution();
 		assert planSolution1 != null;
-		assertEquals(planSolution1.getSolutions().size(), planSolution2.getNumberOfHighlevelPlans());
+		assertEquals(planSolution1.getSolutions().iterator().next().size(), planSolution2.getAllHighlevelPlans().iterator().next().getSteps().size());
 	}
 
 
