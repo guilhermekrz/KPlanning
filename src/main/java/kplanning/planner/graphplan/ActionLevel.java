@@ -9,7 +9,7 @@ import java.util.*;
 class ActionLevel {
 	private StateLevel previousStateLevel;
 	private Set<Action> actions;
-	private Map<Action, Set<Action>> mutexes; // TODO: store only mutexes in sorted order?
+	private Map<Action, Set<Action>> mutexes;
 	private static Map<Action, Set<Action>> staticMutexes;
 	private int level;
 
