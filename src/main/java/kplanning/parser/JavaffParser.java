@@ -36,10 +36,10 @@ public class JavaffParser {
 		this.domainProblem = domainProblemAdapter;
 		if(version == 21) {
 			ungroundProblem = PDDLParser.getUngroundDomainProblem21(domainProblem.getDomain(), domainProblem.getProblem());
-			groundProblem = PDDLParser.getGroundDomainProblem21(domainProblem.getDomain(), domainProblem.getProblem());
+			groundProblem = ungroundProblem.ground();
 		} else if(version == 30) {
 			ungroundProblem = PDDLParser.getUngroundDomainProblem30(domainProblem.getDomain(), domainProblem.getProblem());
-			groundProblem = PDDLParser.getGroundDomainProblem30(domainProblem.getDomain(), domainProblem.getProblem());
+			groundProblem = ungroundProblem.ground();
 		} else {
 			throw new IllegalStateException("Only PDDL version 2.1 or 3.0 supported in JavaffParser");
 		}

@@ -13,6 +13,7 @@ import kplanning.util.DomainProblemUtil;
 public class DomainProblemAdapter {
 
 	private DomainProblem domainProblem;
+	private int pddlVersion;
 
 	// Parsers
 	private JavaffParser javaffParser;
@@ -26,7 +27,7 @@ public class DomainProblemAdapter {
 	// Norms
 	private NormAdapter normAdapter;
 
-	// Others - Lazy init
+	// Others
 	private BitSetAdapter bitSetAdapter;
 
 	/**
@@ -51,18 +52,7 @@ public class DomainProblemAdapter {
 
 	private DomainProblemAdapter(DomainProblem domainProblem, int pddlVersion) {
 		this.domainProblem = domainProblem;
-		if(pddlVersion == 21) {
-			javaffParser = JavaffParser.newInstance21(this, domainProblem);
-		} else if(pddlVersion == 30) {
-			javaffParser = JavaffParser.newInstance30(this, domainProblem);
-		} else {
-			throw new IllegalStateException("Only supported PDDL version 2.1 and 3.0");
-		}
-		pddl4jParser = Pddl4jParser.newInstance(domainProblem);
-		pddl4jToJavaffConverter = Pddl4jToJavaffConverter.getInstance(this);
-		graphplanJavaffConverter = GraphplanJavaffConverter.getInstance(this);
-		graphplanAdapter = GraphplanAdapter.newInstance(this);
-		normAdapter = NormAdapter.newInstance(this);
+		this.pddlVersion = pddlVersion;
 	}
 
 	/**
@@ -74,26 +64,50 @@ public class DomainProblemAdapter {
 	}
 
 	public JavaffParser getJavaffParser() {
+		if(javaffParser == null) {
+			if(pddlVersion == 21) {
+				javaffParser = JavaffParser.newInstance21(this, domainProblem);
+			} else if(pddlVersion == 30) {
+				javaffParser = JavaffParser.newInstance30(this, domainProblem);
+			} else {
+				throw new IllegalStateException("Only supported PDDL version 2.1 and 3.0");
+			}
+		}
 		return javaffParser;
 	}
 
 	public Pddl4jParser getPddl4jParser() {
+		if(pddl4jParser == null) {
+			pddl4jParser = Pddl4jParser.newInstance(domainProblem);
+		}
 		return pddl4jParser;
 	}
 
 	public Pddl4jToJavaffConverter getPddl4jToJavaffConverter() {
+		if(pddl4jToJavaffConverter == null) {
+			pddl4jToJavaffConverter = Pddl4jToJavaffConverter.getInstance(this);
+		}
 		return pddl4jToJavaffConverter;
 	}
 
 	public GraphplanJavaffConverter getGraphplanJavaffConverter() {
+		if(graphplanJavaffConverter == null) {
+			graphplanJavaffConverter = GraphplanJavaffConverter.getInstance(this);
+		}
 		return graphplanJavaffConverter;
 	}
 
 	public GraphplanAdapter getGraphplanAdapter() {
+		if(graphplanAdapter == null) {
+			graphplanAdapter = GraphplanAdapter.newInstance(this);
+		}
 		return graphplanAdapter;
 	}
 
 	public NormAdapter getNormAdapter() {
+		if(normAdapter == null) {
+			normAdapter = NormAdapter.newInstance(this);
+		}
 		return normAdapter;
 	}
 
