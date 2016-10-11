@@ -54,6 +54,9 @@ class ActionLevel {
 					} else if (previousStateLevel.hasCompetingNeeds(action1, action2)) {
 						addMutex(action1, action2);
 					}
+				} else {
+					// We can stop when we reach the same action, as in addMutex we are adding mutex in both ways
+					break;
 				}
 			}
 		}
@@ -64,6 +67,12 @@ class ActionLevel {
 			this.mutexes.put(action1, new HashSet<>(Collections.singletonList(action2)));
 		} else {
 			this.mutexes.get(action1).add(action2);
+		}
+
+		if(!this.mutexes.containsKey(action2)) {
+			this.mutexes.put(action2, new HashSet<>(Collections.singletonList(action1)));
+		} else {
+			this.mutexes.get(action2).add(action1);
 		}
 	}
 
