@@ -130,6 +130,9 @@ class StateLevel {
 							addMutex(fact1, fact2);
 						}
 					}
+				} else {
+					// We can stop when we reach the same fact, as in addMutex we are adding mutex in both ways
+					break;
 				}
 			}
 		}
@@ -140,6 +143,12 @@ class StateLevel {
 			this.mutexes.put(fact1, new HashSet<>(Collections.singletonList(fact2)));
 		} else {
 			this.mutexes.get(fact1).add(fact2);
+		}
+
+		if(!this.mutexes.containsKey(fact2)) {
+			this.mutexes.put(fact2, new HashSet<>(Collections.singletonList(fact1)));
+		} else {
+			this.mutexes.get(fact2).add(fact1);
 		}
 	}
 
