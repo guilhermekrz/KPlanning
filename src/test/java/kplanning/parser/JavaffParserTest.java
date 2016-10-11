@@ -19,7 +19,7 @@ public class JavaffParserTest {
 		assertEquals(5, ungroundProblem.actions.size());
 		assertEquals(5, ungroundProblem.predSymbols.size());
 		assertEquals(3, ungroundProblem.objects.size());
-		assertEquals(4, ungroundProblem.initial.size());
+		assertEquals(1, ungroundProblem.initial.size());
 		assertEquals(2, ((And) ungroundProblem.goal).size());
 	}
 
@@ -41,7 +41,7 @@ public class JavaffParserTest {
 		assertEquals(5, ungroundProblem.actions.size());
 		assertEquals(5, ungroundProblem.predSymbols.size());
 		assertEquals(3, ungroundProblem.objects.size());
-		assertEquals(4, ungroundProblem.initial.size());
+		assertEquals(1, ungroundProblem.initial.size());
 		assertEquals(2, ((And) ungroundProblem.goal).size());
 		assertEquals(1, ((And) ungroundProblem.constraints).size());
 	}
