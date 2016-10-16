@@ -346,7 +346,7 @@ public class JavaffParser {
 	 * Utility methods
 	 */
 
-	private STRIPSState addMissingFluentFactsToStripsState(STRIPSState stripsState) {
+	public STRIPSState addMissingFluentFactsToStripsState(STRIPSState stripsState) {
 		STRIPSState newStripsState = (STRIPSState) stripsState.clone();
 		for(Proposition proposition : this.groundProblem.getGroundedPropositions()) {
 			if(!newStripsState.isTrue(proposition) && !newStripsState.isTrue(new Not(proposition))) {
