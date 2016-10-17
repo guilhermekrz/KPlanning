@@ -21,12 +21,28 @@ public class GraphplanPlanner {
 
 	@Nullable
 	public PlanSolution plan(boolean foundAllSolutions) {
+		return plan(foundAllSolutions, 0);
+	}
+
+	@Nullable
+	public PlanSolution plan(boolean foundAllSolutions, int levels) {
+		if(!foundAllSolutions && levels > 0) {
+			throw new IllegalStateException("If found all solutions is false, then levels should be zero");
+		}
 		PlanningGraph planningGraph = new PlanningGraph(this.adapter);
 		while(true) {
 			if(planningGraph.isGoalPossible()) {
 				PlanSolution planSolution = planningGraph.extractSolution(foundAllSolutions);
 				if(planSolution != null) {
-					return planSolution;
+					if(levels == 0) {
+						return planSolution;
+					} else {
+						while(levels > 0) {
+							planningGraph.expandGraph();
+							levels--;
+						}
+						return planningGraph.extractSolution(foundAllSolutions);
+					}
 				}
 			}
 			if(planningGraph.hasLevelledOff()) {
