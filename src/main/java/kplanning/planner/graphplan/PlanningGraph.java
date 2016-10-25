@@ -29,7 +29,7 @@ public class PlanningGraph {
 		NONE, NUMBER_OF_GENERATING_ACTIONS, LEVEL_COST
 	}
 
-	private DomainProblemAdapter adapter;
+	DomainProblemAdapter adapter;
 	private Set<Action> actions;
 	private List<StateLevel> stateLevels;
 	private List<ActionLevel> actionLevels;
@@ -132,6 +132,9 @@ public class PlanningGraph {
 		Logger.debug("Graph has levelled off at level {}? {} - # noGoods  {} -> {} - # mutex {} -> {}",
 				getCurrentLevel(), hasLevelledOff, previousStateLevel.getNumberOfNoGoods(), currentStateLevel.getNumberOfNoGoods(),
 				previousActionLevel.getNumberOfMutexes(), currentActionLevel.getNumberOfMutexes());
+		if(hasLevelledOff) {
+			Logger.debug("Could not find a solution");
+		}
 		return hasLevelledOff;
 	}
 
@@ -231,25 +234,27 @@ public class PlanningGraph {
 
 			// We need to check if these new subgoals are not mutex, and also if they are not "noGoods" (if we already failed to find a solution for them for the previous level)
 			if (previousStateLevel.isGoalPossible(newSubgoalFacts) && !previousStateLevel.isNoGood(newSubgoalFacts)) {
-				// Try to find a solution, in the previous level, for these new subgoals
-//				sortFacts(foundAllSolutions, level, newSubgoalFacts);
-				List<List<Set<Action>>> listsFromPreviousLevel = extractSolution(level - 1, new HashSet<>(), new HashSet<>(), newSubgoalFacts, foundAllSolutions);
+				if(canUseThisActions(actionSet, newSubgoalFacts)) {
+					// Try to find a solution, in the previous level, for these new subgoals
+//				    sortFacts(foundAllSolutions, level, newSubgoalFacts);
+					List<List<Set<Action>>> listsFromPreviousLevel = extractSolution(level - 1, new HashSet<>(), new HashSet<>(), newSubgoalFacts, foundAllSolutions);
 
-				if (listsFromPreviousLevel != null) {
-					// If we have found a solution (or many solutions), add this level action set to the end of each solution (plan)
-					if (listsFromPreviousLevel.isEmpty()) {
-						List<Set<Action>> l = new ArrayList<>();
-						l.add(actionSet);
-						solutions.add(l);
-					} else {
-						for (List<Set<Action>> l : listsFromPreviousLevel) {
+					if (listsFromPreviousLevel != null) {
+						// If we have found a solution (or many solutions), add this level action set to the end of each solution (plan)
+						if (listsFromPreviousLevel.isEmpty()) {
+							List<Set<Action>> l = new ArrayList<>();
 							l.add(actionSet);
+							solutions.add(l);
+						} else {
+							for (List<Set<Action>> l : listsFromPreviousLevel) {
+								l.add(actionSet);
+							}
+							solutions.addAll(listsFromPreviousLevel);
 						}
-						solutions.addAll(listsFromPreviousLevel);
+					} else {
+						// If we have not found a solution, then this new subgoals are "noGoods" at the previous level
+						previousStateLevel.addNoGood(newSubgoalFacts);
 					}
-				} else {
-					// If we have not found a solution, then this new subgoals are "noGoods" at the previous level
-					previousStateLevel.addNoGood(newSubgoalFacts);
 				}
 			}
 
@@ -277,24 +282,26 @@ public class PlanningGraph {
 					Set<Action> newActionSet = new HashSet<>(actionSet);
 					newActionSet.add(possibleAction);
 
-					Set<Action> newMutexSet = new HashSet<>(mutexSet);
-					newMutexSet.addAll(previousActionLevel.getMutex(possibleAction));
+					if(canUseThisAction(possibleAction, newActionSet)) {
+						Set<Action> newMutexSet = new HashSet<>(mutexSet);
+						newMutexSet.addAll(previousActionLevel.getMutex(possibleAction));
 
-					// Get new subgoals based on the effects that this action achieves (or deletes) - a single action can achieve more than one subgoal!
-					List<Fact> newSubgoalSet = getNewSubGoals(possibleAction, subgoalFacts);
+						// Get new subgoals based on the effects that this action achieves (or deletes) - a single action can achieve more than one subgoal!
+						List<Fact> newSubgoalSet = getNewSubGoals(possibleAction, subgoalFacts);
 
-					if(needToBackUp(level, newSubgoalSet, newMutexSet)) {
-						// There is no way to extract a solution with this selected action
-						continue;
-					}
+						if (needToBackUp(level, newSubgoalSet, newMutexSet)) {
+							// There is no way to extract a solution with this selected action
+							continue;
+						}
 
-					// Call recursively extract solutions, with the smaller new subgoals, and the new action set
-					List<List<Set<Action>>> tempSolutions = extractSolution(level, newActionSet, newMutexSet, newSubgoalSet, foundAllSolutions);
-					if (tempSolutions != null) {
-						solutions.addAll(tempSolutions);
+						// Call recursively extract solutions, with the smaller new subgoals, and the new action set
+						List<List<Set<Action>>> tempSolutions = extractSolution(level, newActionSet, newMutexSet, newSubgoalSet, foundAllSolutions);
+						if (tempSolutions != null) {
+							solutions.addAll(tempSolutions);
 
-						if(!foundAllSolutions) {
-							return solutions;
+							if (!foundAllSolutions) {
+								return solutions;
+							}
 						}
 					}
 				}
@@ -306,6 +313,14 @@ public class PlanningGraph {
 				return null;
 			}
 		}
+	}
+
+	boolean canUseThisActions(Set<Action> possibleActions, Collection<Fact> subgoalsFactSet) {
+		return true;
+	}
+
+	boolean canUseThisAction(Action possibleAction, Set<Action> actionSet) {
+		return true;
 	}
 
 	private void sortFacts(boolean foundAllSolutions, int level, List<Fact> subgoalFacts) {

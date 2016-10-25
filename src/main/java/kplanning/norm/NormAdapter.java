@@ -38,6 +38,10 @@ public class NormAdapter {
 		populateLtlNorms();
 	}
 
+	/**
+	 * Conditional Norms
+	 */
+
 	public Set<ConditionalNorm> getConditionalNorms() {
 		return conditionalNorms;
 	}
@@ -51,15 +55,17 @@ public class NormAdapter {
 				String line;
 				while ((line = br.readLine()) != null) {
 					String[] split = line.trim().split(";");
-					if (split.length == 3) {
-						String modality = split[0];
-						String context = split[1]; // TODO: separate by comma
-						String action = split[2];
+					if (split.length == 5) {
+						String name = split[0];
+						String modality = split[1];
+						String context = split[2]; // TODO: separate by comma
+						String action = split[3];
+						String cost = split[4];
 
 						try {
 							NormModality normModality = NormModality.valueOf(modality);
 							CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
-							conditionalNorms.add(new ConditionalNorm(adapter, normModality, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action)));
+							conditionalNorms.add(new ConditionalNorm(adapter, name, normModality, Integer.valueOf(cost), compoundLiteral, adapter.getJavaffParser().getUngroundAction(action)));
 						} catch (IllegalArgumentException e) {
 							System.out.println("NormModality should be either PROHIBITION or OBLIGATION");
 						} catch (NotFoundPredicateSymbolException e) {
@@ -68,7 +74,7 @@ public class NormAdapter {
 							System.out.println("Not found specified action: " + action);
 						}
 					} else {
-						System.out.println("Error! Each line should have three elements: " + line);
+						System.out.println("Error! Each line should have five elements: " + line);
 					}
 				}
 			} catch (IOException e) {
@@ -76,6 +82,10 @@ public class NormAdapter {
 			}
 		}
 	}
+
+	/**
+	 * LTL norms
+	 */
 
 	public Set<LtlNorm> getLtlNorms() {
 		return ltlNorms;

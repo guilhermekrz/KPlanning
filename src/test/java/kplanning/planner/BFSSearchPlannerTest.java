@@ -1,7 +1,7 @@
 package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
-import kplanning.plan.Plan;
+import kplanning.plan.PlanSolution;
 import kplanning.util.DomainProblemUtil;
 import org.junit.Test;
 
@@ -13,17 +13,20 @@ public class BFSSearchPlannerTest {
 	public void testPlanBlocksworld1() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 1));
 		Planner planner = new BFSSearchPlanner(adapter);
-		Plan plan = planner.plan();
-		assertEquals(2, plan.getActions().size());
+		PlanSolution planSolution = planner.plan();
+		assert planSolution != null;
+		assertEquals(1, planSolution.getPlans().size());
+		assertEquals(2, planSolution.getPlan().getActions().size());
 	}
 
 	@Test
 	public void testPlanBlocksworld2() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 2));
 		Planner planner = new BFSSearchPlanner(adapter);
-		Plan plan = planner.plan();
-		assertEquals(6, plan.getActions().size());
-		System.out.println(plan);
+		PlanSolution planSolution = planner.plan();
+		assert planSolution != null;
+		assertEquals(1, planSolution.getPlans().size());
+		assertEquals(6, planSolution.getPlan().getActions().size());
 	}
 
 }

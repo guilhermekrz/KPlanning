@@ -5,7 +5,8 @@ import kplanning.DomainProblemAdapter;
 import kplanning.bitset.BitSetAction;
 import kplanning.bitset.BitSetFact;
 import kplanning.plan.Plan;
-import org.jetbrains.annotations.Nullable;
+import kplanning.plan.PlanSolution;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
@@ -15,8 +16,13 @@ public class BFSSearchPlanner extends Planner {
 		super(adapter);
 	}
 
-	@Nullable
-	public Plan plan() {
+	@Override
+	public PlanSolution plan(boolean foundAllSolutions, int levels) {
+		if(foundAllSolutions || levels > 0) {
+			// TODO: implement found all solutions to bfs search
+			throw new NotImplementedException();
+		}
+
 		Set<BitSetAction> bitSetActions = adapter.getBitSetAdapter().getActions();
 		BitSetFact bitSetGoalFact = adapter.getBitSetAdapter().getBitSetFact(adapter.getJavaffParser().getGroundProblem().getGoal());
 
@@ -49,14 +55,14 @@ public class BFSSearchPlanner extends Planner {
 		}
 	}
 
-	private Plan solution(SearchNode searchNode) {
+	private PlanSolution solution(SearchNode searchNode) {
 		List<Action> actions = new ArrayList<>();
 		SearchNode currentNode = searchNode;
 		while(currentNode.getPreviousAction() != null) {
 			actions.add(0, currentNode.getPreviousAction().getAction());
 			currentNode = currentNode.getPreviousNode();
 		}
-		return Plan.newPlanFromActions(actions, adapter);
+		return new PlanSolution(adapter, Plan.newPlanFromActions(actions, adapter));
 	}
 
 	private class SearchNode {

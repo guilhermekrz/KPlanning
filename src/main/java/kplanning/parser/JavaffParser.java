@@ -221,6 +221,27 @@ public class JavaffParser {
 		return addMissingFluentFactsToStripsState(stripsState);
 	}
 
+	public Set<Fact> getTrueFacts(String stringFacts) {
+		Set<Fact> facts = new HashSet<>();
+
+		List<String> strings = Arrays.asList(stringFacts.trim().split(","));
+		for(String s:strings) {
+			List<String> strings1 = Arrays.asList(s.trim().split(" "));
+
+			if(strings1.get(0).trim().isEmpty()) {
+				// Empty
+				continue;
+			}
+
+			if(strings1.get(0).equals("not")) {
+				throw new IllegalStateException("getTrueFacts does not parse NOT facts");
+			} else {
+				facts.add(getProposition(strings1));
+			}
+		}
+		return facts;
+	}
+
 	public STRIPSState getRandomState() {
 		Set<Fact> trueFacts = new HashSet<>();
 		Set<Not> falseFacts = new HashSet<>();

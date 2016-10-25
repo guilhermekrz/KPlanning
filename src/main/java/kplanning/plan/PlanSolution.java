@@ -2,12 +2,11 @@ package kplanning.plan;
 
 import javaff.data.Action;
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.util.SetUtil;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PlanSolution {
 	private DomainProblemAdapter adapter;
@@ -28,9 +27,23 @@ public class PlanSolution {
 		}
 	}
 
+	public PlanSolution(DomainProblemAdapter adapter, Set<Plan> plans) {
+		this.adapter = adapter;
+		this.plans = plans;
+	}
+
+	public PlanSolution(DomainProblemAdapter adapter, Plan plan) {
+		this(adapter, new HashSet<>(Collections.singletonList(plan)));
+	}
+
+	@Nullable
 	public Set<List<Set<Action>>> getSolutions() {
 		return solutions;
 	}
+
+	/**
+	 * Utils
+	 */
 
 	public Set<Plan> getPlans() {
 		if(plans == null) {
@@ -71,6 +84,54 @@ public class PlanSolution {
 		return plans;
 	}
 
+	// Return the first plan
+	@Nullable
+	public Plan getPlan() {
+		Set<Plan> plans = getPlans();
+		if(plans != null && plans.size() > 0) {
+			return plans.iterator().next();
+		} else {
+			return null;
+		}
+	}
+
+	public PlanSolution getSinglePlanSolution() {
+		return new PlanSolution(adapter, getPlan());
+	}
+
+	/**
+	 * Norm related
+	 */
+
+	@Nullable
+	public PlanSolution filterPlansBasedOnNorms(Set<? extends Norm> norms, boolean returnCompliantPlans) {
+		Set<Plan> plans = new HashSet<>();
+		for(Plan plan : getPlans()) {
+			boolean isCompliant = true;
+
+			for(Norm norm : norms) {
+				if(norm.isViolationPlan(plan)) {
+					isCompliant = false;
+					break;
+				}
+			}
+
+			if((isCompliant && returnCompliantPlans) || (!isCompliant && !returnCompliantPlans)) {
+				plans.add(plan);
+			}
+		}
+
+		if(plans.isEmpty()) {
+			return null;
+		} else {
+			return new PlanSolution(adapter, plans);
+		}
+	}
+
+	/**
+	 * Utils
+	 */
+
 	public String getPlansString() {
 		String s = "Found " + getPlans().size() + " plans:\n";
 		for(Plan plan : getPlans()) {
@@ -82,12 +143,17 @@ public class PlanSolution {
 	@Override
 	public String toString() {
 		String s = "Found " + solutions.size() + " high-level solutions:\n";
+		boolean shouldAddNewLine = false;
 		for(List<Set<Action>> solution : solutions) {
+			if(shouldAddNewLine) {
+				s += "\n";
+			} else {
+				shouldAddNewLine = true;
+			}
 			s += "\t" + solution.size() + " steps: ";
 			for(Set<Action> set : solution) {
 				s += "\t" + set;
 			}
-			s += "\n";
 		}
 		return s;
 	}

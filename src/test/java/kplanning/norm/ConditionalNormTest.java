@@ -116,26 +116,26 @@ public class ConditionalNormTest {
 	private ConditionalNorm getSimpleNorm1() {
 		Predicate drunk = new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"));
 		CompoundLiteral compoundLiteral = new And(Collections.singleton(drunk));
-		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, "n1", NormModality.PROHIBITION, 1, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
 	private ConditionalNorm getSimpleNorm2() {
 		Predicate drunk = new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk"));
 		CompoundLiteral compoundLiteral = new And(Collections.singleton(drunk));
-		return new ConditionalNorm(adapter, NormModality.OBLIGATION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, "n1", NormModality.OBLIGATION, 1,compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
 	private ConditionalNorm getComplexNorm1() {
 		Not notDrunk = new Not(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk")));
 		Predicate at = new Predicate(adapter.getJavaffParser().getPredicateSymbol("at"));
 		CompoundLiteral compoundLiteral = new And(Arrays.asList(notDrunk, at));
-		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, "n1", NormModality.PROHIBITION, 1, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 
 	private ConditionalNorm getComplexNorm1Alt() {
 		Not notDrunk = new Not(new Predicate(adapter.getJavaffParser().getPredicateSymbol("drunk")));
 		Predicate at = new Predicate(adapter.getJavaffParser().getPredicateSymbol("at"));
 		CompoundLiteral compoundLiteral = new And(Arrays.asList(at, notDrunk));
-		return new ConditionalNorm(adapter, NormModality.PROHIBITION, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
+		return new ConditionalNorm(adapter, "n1", NormModality.PROHIBITION, 1, compoundLiteral, adapter.getJavaffParser().getUngroundAction("move"));
 	}
 }

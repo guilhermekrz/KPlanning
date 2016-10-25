@@ -2,6 +2,6 @@ package kplanning.norm;
 
 import kplanning.plan.Plan;
 
-abstract class Norm {
-	abstract boolean isViolationPlan(Plan plan);
+public abstract class Norm {
+	public abstract boolean isViolationPlan(Plan plan);
 }

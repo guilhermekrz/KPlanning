@@ -1,7 +1,8 @@
 package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
-import kplanning.plan.Plan;
+import kplanning.plan.PlanSolution;
+import org.jetbrains.annotations.Nullable;
 
 // TODO: make this more generic, to be able to use JavaGP under this (return multiple plans? IDK) - and JavaFF?
 public abstract class Planner {
@@ -11,5 +12,16 @@ public abstract class Planner {
 		this.adapter = adapter;
 	}
 
-	public abstract Plan plan();
+	@Nullable
+	public PlanSolution plan() {
+		return plan(false);
+	}
+
+	@Nullable
+	public PlanSolution plan(boolean foundAllSolutions) {
+		return plan(foundAllSolutions, 0);
+	}
+
+	@Nullable
+	public abstract PlanSolution plan(boolean foundAllSolutions, int levels);
 }
