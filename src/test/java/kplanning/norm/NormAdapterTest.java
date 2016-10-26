@@ -5,8 +5,6 @@ import kplanning.util.DomainProblemUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 
 public class NormAdapterTest {
@@ -19,8 +17,8 @@ public class NormAdapterTest {
 
 	@Test
 	public void testGetConditionalNorms() {
-		Set<ConditionalNorm> conditionalNorms = adapter.getNormAdapter().getConditionalNorms();
-		assertEquals(1, conditionalNorms.size());
+		assertEquals(1, adapter.getNormAdapter().getConditionalNorms().size());
+		assertEquals(2, adapter.getNormAdapter().getGroundConditionalNorms().size());
 	}
 
 }

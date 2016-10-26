@@ -15,7 +15,6 @@
 	(:action move                                
      :parameters (?l1 - location ?l2 - location)
      :precondition (and (at ?l1)
-              (not (at ?l2))
      					(connected ?l1 ?l2)
      				)
      :effect (and 

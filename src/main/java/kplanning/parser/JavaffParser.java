@@ -10,7 +10,7 @@ import kplanning.exception.NotFoundPredicateSymbolException;
 import kplanning.reachableStates.ActionsReachableStatesStrategy;
 import kplanning.reachableStates.GetReachableStatesStrategy;
 import kplanning.util.DomainProblem;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -318,7 +318,7 @@ public class JavaffParser {
 	 * Miscellaneous - Actions
 	 */
 
-	@Nullable
+	@NotNull
 	public Action getAction(String action) {
 		List<String> a1 = Arrays.asList(action.trim().split(" "));
 		String name = a1.get(0);

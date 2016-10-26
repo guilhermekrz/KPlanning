@@ -25,6 +25,7 @@ public class BitSetFactTest {
 		// B1
 		BitSetFact b1 = new BitSetFact(adapter, adapter.getJavaffParser().getAction("move a b").getPreconditions());
 		BitSet expectedPreOrBitSet1 = new BitSet();
+		expectedPreOrBitSet1.set(1);
 		expectedPreOrBitSet1.set(2);
 		expectedPreOrBitSet1.set(3);
 		BitSet expectedPreEqualsBitSet1 = new BitSet();
@@ -48,6 +49,7 @@ public class BitSetFactTest {
 		// B3
 		BitSetFact b3 = new BitSetFact(adapter, adapter.getJavaffParser().getAction("move b a").getPreconditions());
 		BitSet expectedPreOrBitSet3 = new BitSet();
+		expectedPreOrBitSet3.set(0);
 		expectedPreOrBitSet3.set(2);
 		expectedPreOrBitSet3.set(3);
 		BitSet expectedPreEqualsBitSet3 = new BitSet();
