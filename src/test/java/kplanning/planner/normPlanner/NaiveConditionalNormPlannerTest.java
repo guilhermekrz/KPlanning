@@ -11,7 +11,7 @@ public class NaiveConditionalNormPlannerTest {
 
 	@Test
 	public void testDrinkAndDriveNorms1() {
-		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		NormPlanner planner = new NaiveConditionalNormPlanner(adapter);
 		PlanSolution planSolution1 = planner.planNormCompliant();
 		assertEquals(null, planSolution1);
@@ -19,7 +19,7 @@ public class NaiveConditionalNormPlannerTest {
 
 	@Test
 	public void testDrinkAndDriveNorms2() {
-		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 2));
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 2), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		NormPlanner planner = new NaiveConditionalNormPlanner(adapter);
 		PlanSolution planSolution1 = planner.planNormCompliant();
 		assertEquals(null, planSolution1);

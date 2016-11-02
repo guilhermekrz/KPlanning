@@ -14,6 +14,7 @@ public class DomainProblemAdapter {
 
 	private DomainProblem domainProblem;
 	private int pddlVersion;
+	private String conditionalNormFile;
 
 	// Parsers
 	private JavaffParser javaffParser;
@@ -34,12 +35,22 @@ public class DomainProblemAdapter {
 	 * Constructors
 	 */
 
+	// TODO: make builder pattern, add norm to DomainProblemUtil?
+
 	public static DomainProblemAdapter newInstance(String domain, String problem) {
-		return DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(domain, problem));
+		return DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(domain, problem), null);
+	}
+
+	public static DomainProblemAdapter newInstance(String domain, String problem, String conditionalNormFile) {
+		return DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem(domain, problem), conditionalNormFile);
 	}
 
 	public static DomainProblemAdapter newInstance(DomainProblem domainProblem) {
-		return DomainProblemAdapter.newInstance(domainProblem, 30);
+		return DomainProblemAdapter.newInstance(domainProblem, 30, null);
+	}
+
+	public static DomainProblemAdapter newInstance(DomainProblem domainProblem, String conditionalNormFile) {
+		return DomainProblemAdapter.newInstance(domainProblem, 30, conditionalNormFile);
 	}
 
 	public static DomainProblemAdapter newInstance(String domain, String problem, int pddlVersion) {
@@ -47,12 +58,17 @@ public class DomainProblemAdapter {
 	}
 
 	public static DomainProblemAdapter newInstance(DomainProblem domainProblem, int pddlVersion) {
-		return new DomainProblemAdapter(domainProblem, pddlVersion);
+		return new DomainProblemAdapter(domainProblem, pddlVersion, null);
 	}
 
-	private DomainProblemAdapter(DomainProblem domainProblem, int pddlVersion) {
+	public static DomainProblemAdapter newInstance(DomainProblem domainProblem, int pddlVersion, String conditionalNormFile) {
+		return new DomainProblemAdapter(domainProblem, pddlVersion, conditionalNormFile);
+	}
+
+	private DomainProblemAdapter(DomainProblem domainProblem, int pddlVersion, String conditionalNormFile) {
 		this.domainProblem = domainProblem;
 		this.pddlVersion = pddlVersion;
+		this.conditionalNormFile = conditionalNormFile;
 	}
 
 	/**
@@ -102,6 +118,10 @@ public class DomainProblemAdapter {
 			graphplanAdapter = GraphplanAdapter.newInstance(this);
 		}
 		return graphplanAdapter;
+	}
+
+	public String getConditionalNormFile() {
+		return conditionalNormFile;
 	}
 
 	public NormAdapter getNormAdapter() {

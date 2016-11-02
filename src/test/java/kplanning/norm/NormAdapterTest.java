@@ -12,7 +12,7 @@ public class NormAdapterTest {
 
 	@Before
 	public void setUp() throws Exception {
-		adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1));
+		adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 	}
 
 	@Test

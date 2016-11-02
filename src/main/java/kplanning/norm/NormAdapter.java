@@ -55,66 +55,66 @@ public class NormAdapter {
 	}
 
 	private void populateConditionalNorms() {
-		String conditionalNormsFile = adapter.getDomainProblem().getBasePath() + "/conditionalNorms.pddl";
 		conditionalNorms = new HashSet<>();
 		this.groundConditionalNorms = new HashSet<>();
-		File file = new File(conditionalNormsFile);
-		if(file.exists()) {
-			try (BufferedReader br = new BufferedReader(new FileReader(conditionalNormsFile))) {
-				String line;
-				while ((line = br.readLine()) != null) {
-					String[] split = line.trim().split(";");
-					if (split.length == 6) {
-						String ground = split[0];
-						String name = split[1];
-						String modality = split[2];
-						String context = split[3]; // TODO: separate by comma
-						String action = split[4];
-						String cost = split[5];
+		if(adapter.getConditionalNormFile() != null) {
+			File file = new File(adapter.getConditionalNormFile());
+			if (file.exists()) {
+				try (BufferedReader br = new BufferedReader(new FileReader(adapter.getConditionalNormFile()))) {
+					String line;
+					while ((line = br.readLine()) != null) {
+						String[] split = line.trim().split(";");
+						if (split.length == 6) {
+							String ground = split[0];
+							String name = split[1];
+							String modality = split[2];
+							String context = split[3]; // TODO: separate by comma
+							String action = split[4];
+							String cost = split[5];
 
-						NormModality normModality = NormModality.valueOf(modality);
-						if(!ground.startsWith("//")) {
-							try {
-								int intCost = Integer.valueOf(cost);
+							NormModality normModality = NormModality.valueOf(modality);
+							if (!ground.startsWith("//")) {
+								try {
+									int intCost = Integer.valueOf(cost);
 
-								if(ground.equals("unground")) {
-									CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
-									ConditionalNorm conditionalNorm = new ConditionalNorm(adapter, name, normModality, intCost, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action));
-									conditionalNorms.add(conditionalNorm);
-									this.groundConditionalNorms.addAll(conditionalNorm.ground());
-								} else {
-									Set<Fact> trueFacts = adapter.getJavaffParser().getTrueFacts(context);
+									if (ground.equals("unground")) {
+										CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
+										ConditionalNorm conditionalNorm = new ConditionalNorm(adapter, name, normModality, intCost, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action));
+										conditionalNorms.add(conditionalNorm);
+										this.groundConditionalNorms.addAll(conditionalNorm.ground());
+									} else {
+										Set<Fact> trueFacts = adapter.getJavaffParser().getTrueFacts(context);
 
-									Action thisAction = adapter.getJavaffParser().getAction(action);
-									Set<Fact> preconditions = thisAction.getPreconditions();
-									for(Fact pre : preconditions) {
-										if(pre instanceof Not) {
-											trueFacts.add(((Not) pre).getLiteral());
-										} else {
-											trueFacts.add(pre);
+										Action thisAction = adapter.getJavaffParser().getAction(action);
+										Set<Fact> preconditions = thisAction.getPreconditions();
+										for (Fact pre : preconditions) {
+											if (pre instanceof Not) {
+												trueFacts.add(((Not) pre).getLiteral());
+											} else {
+												trueFacts.add(pre);
+											}
 										}
-									}
 
-									GroundConditionalNorm groundConditionalNorm = new GroundConditionalNorm(adapter, name, normModality, trueFacts, intCost, thisAction);
-									this.groundConditionalNorms.add(groundConditionalNorm);
+										GroundConditionalNorm groundConditionalNorm = new GroundConditionalNorm(adapter, name, normModality, trueFacts, intCost, thisAction);
+										this.groundConditionalNorms.add(groundConditionalNorm);
+									}
+								} catch (IllegalArgumentException e) {
+									System.out.println("NormModality should be either PROHIBITION or OBLIGATION");
+								} catch (NotFoundPredicateSymbolException e) {
+									System.out.println("Not found specified predicate(s): " + context);
+								} catch (NotFoundActionException e) {
+									System.out.println("Not found specified action: " + action);
 								}
-							} catch (IllegalArgumentException e) {
-								System.out.println("NormModality should be either PROHIBITION or OBLIGATION");
-							} catch (NotFoundPredicateSymbolException e) {
-								System.out.println("Not found specified predicate(s): " + context);
-							} catch (NotFoundActionException e) {
-								System.out.println("Not found specified action: " + action);
 							}
+						} else {
+							System.out.println("Error! Each line should have six elements: " + line);
 						}
-					} else {
-						System.out.println("Error! Each line should have six elements: " + line);
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
-
 	}
 
 	/**
