@@ -75,10 +75,10 @@ public class NormAdapter {
 						NormModality normModality = NormModality.valueOf(modality);
 						if(!ground.startsWith("//")) {
 							try {
-								CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
 								int intCost = Integer.valueOf(cost);
 
 								if(ground.equals("unground")) {
+									CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
 									ConditionalNorm conditionalNorm = new ConditionalNorm(adapter, name, normModality, intCost, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action));
 									conditionalNorms.add(conditionalNorm);
 									this.groundConditionalNorms.addAll(conditionalNorm.ground());
