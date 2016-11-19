@@ -142,17 +142,31 @@ public class PlanSolution {
 
 	@Override
 	public String toString() {
-		String s = "Found " + solutions.size() + " high-level solutions:\n";
-		boolean shouldAddNewLine = false;
-		for(List<Set<Action>> solution : solutions) {
-			if(shouldAddNewLine) {
-				s += "\n";
-			} else {
-				shouldAddNewLine = true;
+		String s;
+		if(solutions != null) {
+			s = "Found " + solutions.size() + " high-level solutions:\n";
+			boolean shouldAddNewLine = false;
+			for (List<Set<Action>> solution : solutions) {
+				if (shouldAddNewLine) {
+					s += "\n";
+				} else {
+					shouldAddNewLine = true;
+				}
+				s += "\t" + solution.size() + " steps: ";
+				for (Set<Action> set : solution) {
+					s += "\t" + set;
+				}
 			}
-			s += "\t" + solution.size() + " steps: ";
-			for(Set<Action> set : solution) {
-				s += "\t" + set;
+		} else {
+			s = "Found " + plans.size() + " high-level solutions:\n";
+			boolean shouldAddNewLine = false;
+			for (Plan plan : plans) {
+				if (shouldAddNewLine) {
+					s += "\n";
+				} else {
+					shouldAddNewLine = true;
+				}
+				s += "\t" + plan;
 			}
 		}
 		return s;

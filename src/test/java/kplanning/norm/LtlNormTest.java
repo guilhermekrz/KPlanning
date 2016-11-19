@@ -17,7 +17,7 @@ public class LtlNormTest {
 
 	@Before
 	public void setUp() throws Exception {
-		adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 2));
+		adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 21));
 	}
 
 	// Always

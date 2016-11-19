@@ -148,6 +148,10 @@ public class LtlNorm extends Norm {
 		return false;
 	}
 
+	public boolean isTrue(STRIPSState stripsState) {
+		return stripsState.isTrue(o);
+	}
+
 	@Override
 	public String toString() {
 		return prefName + "\t(" + connective + " " + ((t != -1)? t + " " : "") + ((o != null)? o :"") + ((v != null)? v : "") + ")";
