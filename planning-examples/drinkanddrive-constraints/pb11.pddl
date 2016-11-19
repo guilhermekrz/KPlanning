@@ -13,8 +13,7 @@
   			(connected b a)
   )
   (:goal 
-  		(and  
-  			(drunk)
+  		(and
   			(at b)
   		)
   )

@@ -14,6 +14,9 @@
   			(connected a b)
   			(connected a c)
 
+  			(connected a h)
+            (connected h a)
+
   			(connected b a)
   			(connected c a)
   			
@@ -41,7 +44,7 @@
   			(connected i a)
   )
   (:goal 
-  		(and  
+  		(and
   			(drunk)
   			(at h)
   		)

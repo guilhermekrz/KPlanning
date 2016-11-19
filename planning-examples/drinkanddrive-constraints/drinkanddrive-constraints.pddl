@@ -17,9 +17,7 @@
      :parameters (?l1 - location ?l2 - location)
      :precondition (and (at ?l1)
               (not (at ?l2))
-     					(connected ?l1 ?l2) 
-     					;(not (drunk))  ; This should be a norm
-     					;(sober)
+     					(connected ?l1 ?l2)
      				)
      :effect (and 
      				(not (at ?l1))
@@ -54,8 +52,7 @@
      :precondition (and (inbar ?b)
      				)
      :effect 	(and 
-     				(drunk) 
-     				;(not (sober))
+     				(drunk)
      			)
  	)
 
@@ -64,8 +61,7 @@
      :precondition (and (at ?l)
      				)
      :effect 	(and 
-     				(not (drunk)) 
-     				;(sober)
+     				(not (drunk))
      			)
  	)
 )
