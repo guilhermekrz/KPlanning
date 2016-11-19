@@ -52,12 +52,14 @@ public class ForwardNormPlanner extends NormPlanner {
 				abolsuteViolationNorms = new HashSet<>();
 
 				for(LtlNorm ltlNorm : adapter.getNormAdapter().getLtlNorms()) {
-					if(ltlNorm.getConnective().equals(Connective.ALWAYS)) {
+					if(ltlNorm.getConnective().equals(Connective.ALWAYS)
+							|| ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
 						ltlNorms.add(ltlNorm);
 					} else if(ltlNorm.getConnective().equals(Connective.SOMETIME)) {
 						curretlyiolationNorms.add(ltlNorm);
 					}
 				}
+				update(adapter.getJavaffParser().getCompleteInitState());
 			}
 		}
 
@@ -74,13 +76,17 @@ public class ForwardNormPlanner extends NormPlanner {
 			Set<LtlNorm> newNotViolations = new HashSet<>();
 			for(LtlNorm ltlNorm : curretlyiolationNorms) {
 				if(ltlNorm.getConnective().equals(Connective.ALWAYS)) {
-					if(ltlNorm.isTrue(newState)) {
+					if(ltlNorm.isOTrue(newState)) {
 						newNotViolations.add(ltlNorm);
 					} else {
 						newAbsoluteViolations.add(ltlNorm);
 					}
 				} else if(ltlNorm.getConnective().equals(Connective.SOMETIME)) {
-					if(ltlNorm.isTrue(newState)) {
+					if(ltlNorm.isOTrue(newState)) {
+						newNotViolations.add(ltlNorm);
+					}
+				} else if(ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
+					if(ltlNorm.isVTrue(newState)) {
 						newNotViolations.add(ltlNorm);
 					}
 				}
@@ -89,6 +95,15 @@ public class ForwardNormPlanner extends NormPlanner {
 			curretlyiolationNorms.removeAll(newAbsoluteViolations);
 			curretlyiolationNorms.removeAll(newNotViolations);
 			abolsuteViolationNorms.addAll(newAbsoluteViolations);
+
+			// Add to currently violation
+			for(LtlNorm ltlNorm : ltlNorms) {
+				if(ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
+					if(ltlNorm.isOTrue(newState)) {
+						curretlyiolationNorms.add(ltlNorm);
+					}
+				}
+			}
 		}
 
 		boolean isCurrentlyViolation() {
@@ -180,6 +195,7 @@ public class ForwardNormPlanner extends NormPlanner {
 			actions.add(0, currentNode.getPreviousAction());
 			currentNode = currentNode.getPreviousNode();
 		}
+		// TODO: return this NormKeeper in Plan Solution!!!
 		System.out.println(searchNode.getNormKeeper());
 		return new PlanSolution(adapter, Plan.newPlanFromActions(actions, adapter));
 	}

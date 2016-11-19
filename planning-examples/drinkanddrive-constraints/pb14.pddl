@@ -5,7 +5,7 @@
 		a b - location
 		bara - bar)
   (:init 
-  			(at a)
+  			(at b)
   			
   			(in bara a)
 
@@ -14,12 +14,12 @@
   )
   (:goal 
   		(and
-  			(at b)
+  			(at a)
   		)
   )
   (:constraints
     (and
-        (preference a2 (sometime (drunk)))
+        (preference a4 (sometime-after (at b) (and (at a) (drunk))))
     )
   )
 )

@@ -46,6 +46,18 @@ public class ForwardNormPlannerTest {
 		assertEquals(Plan.newPlanFromStringActions(adapter, "move a b"), planSolution2.getPlan());
 	}
 
+	@Test
+	public void testDrinkAndDriveNorms14() {
+		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 14));
+		ForwardNormPlanner planner = new ForwardNormPlanner(adapter);
+
+		PlanSolution planSolution1 = planner.planNormCompliant();
+		assertEquals(Plan.newPlanFromStringActions(adapter, "move b a", "enter a bara", "drink bara", "exit a bara"), planSolution1.getPlan());
+
+		PlanSolution planSolution2 = planner.planNormViolation();
+		assertEquals(Plan.newPlanFromStringActions(adapter, "move b a"), planSolution2.getPlan());
+	}
+
 //	@Test
 //	public void testDrinkAndDriveNorms21() {
 //		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 2), "planning-examples/drinkanddrive/pb1.conditionalNorms");

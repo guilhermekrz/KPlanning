@@ -148,8 +148,12 @@ public class LtlNorm extends Norm {
 		return false;
 	}
 
-	public boolean isTrue(STRIPSState stripsState) {
+	public boolean isOTrue(STRIPSState stripsState) {
 		return stripsState.isTrue(o);
+	}
+
+	public boolean isVTrue(STRIPSState stripsState) {
+		return stripsState.isTrue(v);
 	}
 
 	@Override
