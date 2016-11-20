@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+// TODO: add tests with all connectives
+// TODO: add large problems
 public class ForwardNormPlannerTest {
 
 	@Test

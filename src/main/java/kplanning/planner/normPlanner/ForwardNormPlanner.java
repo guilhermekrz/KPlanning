@@ -13,7 +13,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
+// Solution from the other paper is quite clever, because it uses the already implemented mechanism to perform this...
 public class ForwardNormPlanner extends NormPlanner {
+
+	private static final boolean USE_NORM_KEEPER = false;
 
 	public ForwardNormPlanner(DomainProblemAdapter adapter) {
 		super(adapter);
@@ -34,9 +37,213 @@ public class ForwardNormPlanner extends NormPlanner {
 		throw new NotImplementedException();
 	}
 
-	// Solution from the other paper is quite clever, because it uses the already implemented mechanism to perform this...
-	private class NormKeeper {
+	private @Nullable PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
+		if(foundAllSolutions || levels > 0) {
+			// TODO: implement found all solutions to bfs search
+			throw new NotImplementedException();
+		}
 
+		Set<Action> actions = adapter.getJavaffParser().getGroundProblem().getActions();
+		GroundFact goalGroundFact = adapter.getJavaffParser().getGroundProblem().getGoal();
+
+		STRIPSState completeInitState = adapter.getJavaffParser().getCompleteInitState();
+		SearchNode searchNode = new SearchNode(completeInitState);
+		if(goalGroundFact.isTrue(completeInitState)) {
+			return solution(searchNode);
+		}
+
+		PriorityQueue<SearchNode> frontier = new PriorityQueue<>((s1, s2) -> Integer.compare(s1.getCurrentCost(), s2.getCurrentCost()));
+		frontier.add(searchNode);
+
+		Set<STRIPSState> explored = new HashSet<>();
+
+		while(true) {
+			if(frontier.isEmpty()) {
+				return null;
+			}
+			searchNode = frontier.remove();
+			explored.add(searchNode.getState());
+			for(Action action : actions) {
+				if(action.isApplicable(searchNode.getState())) {
+					STRIPSState newState = (STRIPSState) searchNode.getState().clone();
+					action.apply(newState);
+
+					SearchNode childNode = new SearchNode(searchNode, action, newState);
+					if (!frontier.contains(childNode) && !explored.contains(childNode.getState())) {
+						// If norm compliant
+						//noinspection SimplifiableBooleanExpression
+						if(returnNormCompliant) {
+							if(!childNode.isAbsoluteViolation()) {
+								if (goalGroundFact.isTrue(childNode.getState()) && !childNode.isCurrentlyViolation()) {
+									return solution(childNode);
+								}
+								frontier.add(childNode);
+							}
+						} else {
+							// !returnNormCompliant
+							if (goalGroundFact.isTrue(childNode.getState()) && childNode.isCurrentlyViolation()) {
+								return solution(childNode);
+							}
+							frontier.add(childNode);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private PlanSolution solution(SearchNode searchNode) {
+		// TODO: return this NormKeeper in Plan Solution!!!
+//		System.out.println(searchNode.getNormKeeper());
+		return new PlanSolution(adapter, Plan.newPlanFromActions(searchNode.getActions(), adapter));
+	}
+
+	// TODO: separate norm keeper and current solution
+	public class SearchNode {
+		private SearchNode previousNode;
+		private Action previousAction;
+		private STRIPSState state;
+		private int currentCost;
+
+		// Norm keeper
+		private NormKeeper normKeeper;
+		private boolean normKeeperUpdated = false;
+
+		// Runtime
+		private boolean violationUpdated, isAbsoluteViolation, isCurrentlyViolation;
+
+		SearchNode(STRIPSState state) {
+			this(null, null, state);
+		}
+
+		SearchNode(SearchNode previousNode, Action previousAction, STRIPSState state) {
+			this.previousNode = previousNode;
+			this.previousAction = previousAction;
+			this.state = state;
+			if(this.previousNode == null) {
+				if(USE_NORM_KEEPER) {
+					this.normKeeper = new NormKeeper();
+				}
+				this.currentCost = 0;
+			} else {
+				if(USE_NORM_KEEPER) {
+					this.normKeeper = this.previousNode.getCloneNormKeeper();
+				}
+				this.currentCost = this.previousNode.getCurrentCost() + 1; // Actions always have cost 1
+			}
+			this.violationUpdated = false;
+		}
+
+		SearchNode getPreviousNode() {
+			return previousNode;
+		}
+
+		public STRIPSState getState() {
+			return state;
+		}
+
+		Action getPreviousAction() {
+			return previousAction;
+		}
+
+		int getCurrentCost() {
+			return currentCost;
+		}
+
+		private NormKeeper getCloneNormKeeper() {
+			return (NormKeeper) normKeeper.clone();
+		}
+
+		// There is no way that this search will return a non-violation plan
+		public boolean isAbsoluteViolation() {
+			if(USE_NORM_KEEPER) {
+				checkAndUpdateNormKeeper();
+				return normKeeper.isAbsoluteViolation();
+			} else {
+				checkAndUpdateViolation();
+				return isAbsoluteViolation;
+			}
+		}
+
+		// The plan is currently violation some norm, but in the future it could be a non-violation plan
+		public boolean isCurrentlyViolation() {
+			if(USE_NORM_KEEPER) {
+				checkAndUpdateNormKeeper();
+				return normKeeper.isCurrentlyViolation();
+			} else {
+				checkAndUpdateViolation();
+				return isCurrentlyViolation;
+			}
+		}
+
+		// TODO: add some sort of memoization, using previous search node??
+		private void checkAndUpdateViolation() {
+			if(!violationUpdated) {
+				List<STRIPSState> states = getStates();
+				isAbsoluteViolation = false;
+				isCurrentlyViolation = false;
+				for(LtlNorm ltlNorm : adapter.getNormAdapter().getLtlNorms()) {
+					if(ltlNorm.isViolationPlan(states)) {
+						if (ltlNorm.getConnective() == Connective.ALWAYS) {
+							isCurrentlyViolation = true;
+							isAbsoluteViolation = true;
+							break;
+						} else if (ltlNorm.getConnective() == Connective.AT_END) {
+							isCurrentlyViolation = true;
+						} else if (ltlNorm.getConnective() == Connective.SOMETIME) {
+							isCurrentlyViolation = true;
+						} else if (ltlNorm.getConnective() == Connective.AT_MOST_ONCE) {
+							isCurrentlyViolation = true;
+							isAbsoluteViolation = true;
+							break;
+						} else if (ltlNorm.getConnective() == Connective.SOMETIME_AFTER) {
+							isCurrentlyViolation = true;
+						} else if (ltlNorm.getConnective() == Connective.SOMETIME_BEFORE) {
+							isCurrentlyViolation = true;
+							isAbsoluteViolation = true;
+							break;
+						} else if (ltlNorm.getConnective() == Connective.ALWAYS_WITHIN) {
+							isCurrentlyViolation = true;
+						}
+					}
+				}
+			}
+		}
+
+		private void checkAndUpdateNormKeeper() {
+			if(!normKeeperUpdated) {
+				normKeeper.update(state);
+				normKeeperUpdated = true;
+			}
+		}
+
+		public List<Action> getActions() {
+			List<Action> actions = new ArrayList<>();
+			SearchNode currentNode = this;
+			while(currentNode.getPreviousAction() != null) {
+				actions.add(0, currentNode.getPreviousAction());
+				currentNode = currentNode.getPreviousNode();
+			}
+			return actions;
+		}
+
+		List<STRIPSState> getStates() {
+			List<STRIPSState> states = new ArrayList<>();
+			SearchNode currentNode = this;
+			do {
+				states.add(0, currentNode.getState());
+				currentNode = currentNode.getPreviousNode();
+			} while(currentNode != null);
+			return states;
+		}
+
+		@Override
+		public int hashCode() {
+			return state.hashCode();
+		}
+	}
+
+	private class NormKeeper {
 		Set<LtlNorm> ltlNorms;
 		Set<LtlNorm> curretlyiolationNorms;
 		Set<LtlNorm> abolsuteViolationNorms;
@@ -59,7 +266,6 @@ public class ForwardNormPlanner extends NormPlanner {
 						curretlyiolationNorms.add(ltlNorm);
 					}
 				}
-				update(adapter.getJavaffParser().getCompleteInitState());
 			}
 		}
 
@@ -126,126 +332,6 @@ public class ForwardNormPlanner extends NormPlanner {
 		@Override
 		public String toString() {
 			return "Norm Keeper:\n\tCurrently violation norms:" + curretlyiolationNorms + "\n\tAbsolute violation norms:" + abolsuteViolationNorms;
-		}
-	}
-
-	private @Nullable PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
-		if(foundAllSolutions || levels > 0) {
-			// TODO: implement found all solutions to bfs search
-			throw new NotImplementedException();
-		}
-
-		NormKeeper normKeeper = new NormKeeper();
-
-		Set<Action> actions = adapter.getJavaffParser().getGroundProblem().getActions();
-		GroundFact goalGroundFact = adapter.getJavaffParser().getGroundProblem().getGoal();
-
-		STRIPSState completeInitState = adapter.getJavaffParser().getCompleteInitState();
-		SearchNode searchNode = new SearchNode(completeInitState, normKeeper);
-		if(goalGroundFact.isTrue(completeInitState)) {
-			return solution(searchNode);
-		}
-
-		PriorityQueue<SearchNode> frontier = new PriorityQueue<>((s1, s2) -> Integer.compare(s1.getCurrentCost(), s2.getCurrentCost()));
-		frontier.add(searchNode);
-
-		Set<STRIPSState> explored = new HashSet<>();
-
-		while(true) {
-			if(frontier.isEmpty()) {
-				return null;
-			}
-			searchNode = frontier.remove();
-			explored.add(searchNode.getState());
-			for(Action action : actions) {
-				if(action.isApplicable(searchNode.getState())) {
-					STRIPSState newState = (STRIPSState) searchNode.getState().clone();
-					action.apply(newState);
-
-					SearchNode childNode = new SearchNode(searchNode, action, newState, searchNode.getCurrentCost() + 1, searchNode.getCloneNormKeeper()); // Actions always have cost 1
-					if (!frontier.contains(childNode) && !explored.contains(childNode.getState())) {
-						childNode.getNormKeeper().update(newState);
-
-						// If norm compliant
-						//noinspection SimplifiableBooleanExpression
-						if(returnNormCompliant) {
-							if(!childNode.getNormKeeper().isAbsoluteViolation()) {
-								if (goalGroundFact.isTrue(childNode.getState()) && !childNode.getNormKeeper().isCurrentlyViolation()) {
-									return solution(childNode);
-								}
-								frontier.add(childNode);
-							}
-						} else {
-							// !returnNormCompliant
-							if (goalGroundFact.isTrue(childNode.getState()) && childNode.getNormKeeper().isCurrentlyViolation()) {
-								return solution(childNode);
-							}
-							frontier.add(childNode);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private PlanSolution solution(SearchNode searchNode) {
-		List<Action> actions = new ArrayList<>();
-		SearchNode currentNode = searchNode;
-		while(currentNode.getPreviousAction() != null) {
-			actions.add(0, currentNode.getPreviousAction());
-			currentNode = currentNode.getPreviousNode();
-		}
-		// TODO: return this NormKeeper in Plan Solution!!!
-		System.out.println(searchNode.getNormKeeper());
-		return new PlanSolution(adapter, Plan.newPlanFromActions(actions, adapter));
-	}
-
-	private class SearchNode {
-		private SearchNode previousNode;
-		private Action previousAction;
-		private STRIPSState state;
-		private int currentCost;
-		private NormKeeper normKeeper;
-
-		SearchNode(STRIPSState state, NormKeeper normKeeper) {
-			this(null, null, state, 0, normKeeper);
-		}
-
-		SearchNode(SearchNode previousNode, Action previousAction, STRIPSState state, int currentCost, NormKeeper normKeeper) {
-			this.previousNode = previousNode;
-			this.previousAction = previousAction;
-			this.state = state;
-			this.currentCost = currentCost;
-			this.normKeeper = normKeeper;
-		}
-
-		SearchNode getPreviousNode() {
-			return previousNode;
-		}
-
-		STRIPSState getState() {
-			return state;
-		}
-
-		Action getPreviousAction() {
-			return previousAction;
-		}
-
-		int getCurrentCost() {
-			return currentCost;
-		}
-
-		NormKeeper getNormKeeper() {
-			return normKeeper;
-		}
-
-		NormKeeper getCloneNormKeeper() {
-			return (NormKeeper) normKeeper.clone();
-		}
-
-		@Override
-		public int hashCode() {
-			return state.hashCode();
 		}
 	}
 }

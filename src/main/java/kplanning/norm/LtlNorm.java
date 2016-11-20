@@ -49,7 +49,10 @@ public class LtlNorm extends Norm {
 
 	@Override
 	public boolean isViolationPlan(Plan plan) {
-		List<STRIPSState> states = plan.getStates();
+		return isViolationPlan(plan.getStates());
+	}
+
+	public boolean isViolationPlan(List<STRIPSState> states) {
 		if(connective == Connective.ALWAYS) {
 			for (STRIPSState state : states) {
 				if (!state.isTrue(o)) {
