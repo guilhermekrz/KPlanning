@@ -4,47 +4,68 @@ import javaff.data.Action;
 import javaff.data.Fact;
 import kplanning.DomainProblemAdapter;
 import kplanning.norm.ConditionalNorm;
+import kplanning.norm.LtlNorm;
+import kplanning.norm.Norm;
 import org.jetbrains.annotations.Nullable;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
 public class NormPlanningGraph extends PlanningGraph {
 
 	private boolean returnNormCompliantPlans;
+	private Set<? extends Norm> norms;
 
-	public NormPlanningGraph(DomainProblemAdapter adapter) {
+	public NormPlanningGraph(DomainProblemAdapter adapter, Set<? extends Norm> norms) {
 		super(adapter);
 		this.returnNormCompliantPlans = true;
+		this.norms = norms;
 	}
 
 	public void setReturnNormCompliantPlans(boolean returnNormCompliantPlans) {
 		this.returnNormCompliantPlans = returnNormCompliantPlans;
 	}
 
-	boolean isViolation(Set<Action> possibleActions, Collection<Fact> subgoalsFactSet) {
-		for(ConditionalNorm conditionalNorm : adapter.getNormAdapter().getConditionalNorms()) {
-			for(Action possibleAction : possibleActions) {
-				if (conditionalNorm.isPossibleViolationAction(possibleAction)) {
-					if (conditionalNorm.isPossibleViolationState(subgoalsFactSet)) {
-						return true;
+	private boolean isViolation(Set<Action> possibleActions, Collection<Fact> subgoalsFactSet) {
+		for(Norm norm : norms) {
+			if(norm instanceof ConditionalNorm) {
+				ConditionalNorm conditionalNorm = (ConditionalNorm) norm;
+				for (Action possibleAction : possibleActions) {
+					if (conditionalNorm.isPossibleViolationAction(possibleAction)) {
+						if (conditionalNorm.isPossibleViolationState(subgoalsFactSet)) {
+							return true;
+						}
 					}
 				}
+			} else if(norm instanceof LtlNorm) {
+				// TODO: implement
+				throw new NotImplementedException();
+			} else {
+				throw new IllegalStateException("Only supported ConditionalNorms or LtlNorms: " + norm);
 			}
 		}
 		return false;
 	}
 
-	boolean isViolation(Action possibleAction, Set<Action> actionSet) {
-		for(ConditionalNorm conditionalNorm : adapter.getNormAdapter().getConditionalNorms()) {
-			if(conditionalNorm.isPossibleViolationAction(possibleAction)) {
-				Set<Fact> newSubgoalFactsSet = new HashSet<>();
-				for (Action action : actionSet) {
-					newSubgoalFactsSet.addAll(action.getPreconditions());
-				}
+	private boolean isViolation(Action possibleAction, Set<Action> actionSet) {
+		for(Norm norm : norms) {
+			if(norm instanceof ConditionalNorm) {
+				ConditionalNorm conditionalNorm = (ConditionalNorm) norm;
+				if (conditionalNorm.isPossibleViolationAction(possibleAction)) {
+					Set<Fact> newSubgoalFactsSet = new HashSet<>();
+					for (Action action : actionSet) {
+						newSubgoalFactsSet.addAll(action.getPreconditions());
+					}
 
-				if(conditionalNorm.isPossibleViolationState(newSubgoalFactsSet)) {
-					return true;
+					if (conditionalNorm.isPossibleViolationState(newSubgoalFactsSet)) {
+						return true;
+					}
 				}
+			} else if(norm instanceof LtlNorm) {
+				// TODO: implement
+				throw new NotImplementedException();
+			} else {
+				throw new IllegalStateException("Only supported ConditionalNorms or LtlNorms: " + norm);
 			}
 		}
 		return false;
@@ -55,7 +76,7 @@ public class NormPlanningGraph extends PlanningGraph {
 		return extractSolution(level, actionSet, mutexSet, subgoalFacts, foundAllSolutions, false);
 	}
 
-	List<List<Set<Action>>> extractSolution(int level, Set<Action> actionSet, Set<Action> mutexSet, List<Fact> subgoalFacts, boolean foundAllSolutions, boolean isViolationPlan) {
+	private List<List<Set<Action>>> extractSolution(int level, Set<Action> actionSet, Set<Action> mutexSet, List<Fact> subgoalFacts, boolean foundAllSolutions, boolean isViolationPlan) {
 		if (level == 0) {
 			if(!returnNormCompliantPlans && !isViolationPlan) {
 				// This plan does not violate a norm

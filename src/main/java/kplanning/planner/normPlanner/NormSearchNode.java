@@ -2,7 +2,7 @@ package kplanning.planner.normPlanner;
 
 import javaff.data.Action;
 import javaff.planning.STRIPSState;
-import kplanning.norm.LtlNorm;
+import kplanning.norm.Norm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,9 @@ abstract class NormSearchNode {
 	private Action previousAction;
 	STRIPSState state;
 	private int currentCost;
-	Set<LtlNorm> ltlNorms;
+	Set<? extends Norm> norms;
 
-	NormSearchNode(STRIPSState state, Set<LtlNorm> ltlNorms) {
-		this(null, null, state, ltlNorms);
-	}
-
-	NormSearchNode(NormSearchNode previousNode, Action previousAction, STRIPSState state, Set<LtlNorm> ltlNorms) {
+	NormSearchNode(NormSearchNode previousNode, Action previousAction, STRIPSState state, Set<? extends Norm> norms) {
 		this.previousNode = previousNode;
 		this.previousAction = previousAction;
 		this.state = state;
@@ -28,7 +24,7 @@ abstract class NormSearchNode {
 		} else {
 			this.currentCost = this.previousNode.getCurrentCost() + 1; // Actions always have cost 1
 		}
-		this.ltlNorms = ltlNorms;
+		this.norms = norms;
 	}
 
 	private NormSearchNode getPreviousNode() {

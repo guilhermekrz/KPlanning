@@ -8,7 +8,6 @@ import javaff.data.strips.Proposition;
 import javaff.data.strips.UngroundInstantAction;
 import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
-import kplanning.plan.Plan;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -128,9 +127,7 @@ public class ConditionalNorm extends Norm {
 
 
 	@Override
-	public boolean isViolationPlan(Plan plan) {
-		List<STRIPSState> states = plan.getStates();
-		List<Action> actions = plan.getActions();
+	public boolean isViolationPlan(List<STRIPSState> states, List<Action> actions) {
 		for(int i=0;i<states.size()-1;i++) {
 			if(isViolationState(states.get(i), actions.get(i))) {
 				return true;

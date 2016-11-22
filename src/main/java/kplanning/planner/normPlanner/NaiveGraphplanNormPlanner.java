@@ -1,17 +1,20 @@
 package kplanning.planner.normPlanner;
 
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.graphplan.PlanningGraph;
 import org.jetbrains.annotations.Nullable;
 import org.pmw.tinylog.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class NaiveConditionalNormPlanner extends NormPlanner {
+import java.util.Set;
+
+public class NaiveGraphplanNormPlanner extends NormPlanner {
 	private PlanningGraph planningGraph;
 
-	public NaiveConditionalNormPlanner(DomainProblemAdapter adapter) {
-		super(adapter);
+	public NaiveGraphplanNormPlanner(DomainProblemAdapter adapter, Set<? extends Norm> norms) {
+		super(adapter, norms);
 		this.planningGraph = new PlanningGraph(adapter);
 	}
 
@@ -37,7 +40,7 @@ public class NaiveConditionalNormPlanner extends NormPlanner {
 				// This is because the first found plan can be not the one we want (accordingly to "returnNormCompliant" parameter)
 				PlanSolution planSolution = planningGraph.extractSolution(true);
 				if(planSolution != null) {
-					PlanSolution filteredPlans = planSolution.filterPlansBasedOnNorms(adapter.getNormAdapter().getConditionalNorms(), returnNormCompliant);
+					PlanSolution filteredPlans = planSolution.filterPlansBasedOnNorms(norms, returnNormCompliant);
 					if(filteredPlans != null) {
 						if(levels == 0) {
 							if(foundAllSolutions) {
@@ -54,7 +57,7 @@ public class NaiveConditionalNormPlanner extends NormPlanner {
 							if(planSolutionLevel == null) {
 								throw new IllegalStateException("Plan Solution Level should never be null, because in a previous level we already found one");
 							}
-							PlanSolution filteredPlansSolutionLevel = planSolutionLevel.filterPlansBasedOnNorms(adapter.getNormAdapter().getConditionalNorms(), returnNormCompliant);
+							PlanSolution filteredPlansSolutionLevel = planSolutionLevel.filterPlansBasedOnNorms(norms, returnNormCompliant);
 							if(filteredPlansSolutionLevel == null) {
 								throw new IllegalStateException("Plan Solution Level should never be null, because in a previous level we already found one");
 							}

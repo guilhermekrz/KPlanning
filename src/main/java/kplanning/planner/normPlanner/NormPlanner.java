@@ -1,13 +1,20 @@
 package kplanning.planner.normPlanner;
 
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.Planner;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public abstract class NormPlanner extends Planner {
-	public NormPlanner(DomainProblemAdapter adapter) {
+
+	Set<? extends Norm> norms;
+
+	public NormPlanner(DomainProblemAdapter adapter, Set<? extends Norm> norms) {
 		super(adapter);
+		this.norms = norms;
 	}
 
 	// Return norm compliant plan

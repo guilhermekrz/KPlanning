@@ -1,10 +1,13 @@
 package kplanning.planner.normPlanner;
 
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.plan.Plan;
 import kplanning.plan.PlanSolution;
 import kplanning.util.DomainProblemUtil;
 import org.junit.Test;
+
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,9 +15,9 @@ import static org.junit.Assert.assertEquals;
 // TODO: add large problems
 public class ForwardNormPlannerTest {
 
-	private void testWithAndWithoutNormKeeper(DomainProblemAdapter adapter, Plan plan1, Plan plan2) {
-		ForwardNormPlanner planner1 = new ForwardNormPlanner(adapter, false);
-		ForwardNormPlanner planner2 = new ForwardNormPlanner(adapter, true);
+	private void testWithAndWithoutNormKeeper(DomainProblemAdapter adapter, Plan plan1, Plan plan2, Set<? extends Norm> norms) {
+		ForwardNormPlanner planner1 = new ForwardNormPlanner(adapter, false, norms);
+		ForwardNormPlanner planner2 = new ForwardNormPlanner(adapter, true, norms);
 
 		PlanSolution planSolution11 = planner1.planNormCompliant();
 		PlanSolution planSolution12 = planner2.planNormCompliant();
@@ -35,28 +38,32 @@ public class ForwardNormPlannerTest {
 	@Test
 	public void testDrinkAndDriveNorms11() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 11));
-		testWithAndWithoutNormKeeper(adapter, null, Plan.newPlanFromStringActions(adapter, "move a b"));
+		testWithAndWithoutNormKeeper(adapter, null, Plan.newPlanFromStringActions(adapter, "move a b"),
+				adapter.getNormAdapter().getLtlNorms());
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms12() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 12));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move a b"),
-				Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"));
+				Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"),
+				adapter.getNormAdapter().getLtlNorms());
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms13() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 13));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"),
-				Plan.newPlanFromStringActions(adapter, "move a b"));
+				Plan.newPlanFromStringActions(adapter, "move a b"),
+				adapter.getNormAdapter().getLtlNorms());
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms14() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 14));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move b a", "enter a bara", "drink bara", "exit a bara"),
-				Plan.newPlanFromStringActions(adapter, "move b a"));
+				Plan.newPlanFromStringActions(adapter, "move b a"),
+				adapter.getNormAdapter().getLtlNorms());
 	}
 
 //	@Test

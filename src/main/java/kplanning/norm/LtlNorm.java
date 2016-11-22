@@ -1,10 +1,10 @@
 package kplanning.norm;
 
 import fr.uga.pddl4j.parser.Connective;
+import javaff.data.Action;
 import javaff.data.CompoundLiteral;
 import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
-import kplanning.plan.Plan;
 
 import java.util.List;
 
@@ -47,12 +47,7 @@ public class LtlNorm extends Norm {
 		return t;
 	}
 
-	@Override
-	public boolean isViolationPlan(Plan plan) {
-		return isViolationPlan(plan.getStates());
-	}
-
-	public boolean isViolationPlan(List<STRIPSState> states) {
+	public boolean isViolationPlan(List<STRIPSState> states, List<Action> actions) {
 		if(connective == Connective.ALWAYS) {
 			for (STRIPSState state : states) {
 				if (!state.isTrue(o)) {

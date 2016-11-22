@@ -1,18 +1,21 @@
 package kplanning.planner.normPlanner;
 
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.graphplan.NormPlanningGraph;
 import org.jetbrains.annotations.Nullable;
 import org.pmw.tinylog.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class ConditionalNormPlanner extends NormPlanner {
+import java.util.Set;
+
+public class GraphplanNormPlanner extends NormPlanner {
 	private NormPlanningGraph planningGraph;
 
-	public ConditionalNormPlanner(DomainProblemAdapter adapter) {
-		super(adapter);
-		this.planningGraph = new NormPlanningGraph(adapter);
+	public GraphplanNormPlanner(DomainProblemAdapter adapter, Set<? extends Norm> norms) {
+		super(adapter, norms);
+		this.planningGraph = new NormPlanningGraph(adapter, norms);
 	}
 
 	@Override

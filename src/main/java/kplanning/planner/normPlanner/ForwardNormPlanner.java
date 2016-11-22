@@ -4,20 +4,23 @@ import javaff.data.Action;
 import javaff.data.GroundFact;
 import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
+import kplanning.norm.Norm;
 import kplanning.plan.Plan;
 import kplanning.plan.PlanSolution;
 import org.jetbrains.annotations.Nullable;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 // Solution from the other paper is quite clever, because it uses the already implemented mechanism to perform this...
 class ForwardNormPlanner extends NormPlanner {
 
 	private boolean useNormKeeper = false;
 
-	public ForwardNormPlanner(DomainProblemAdapter adapter, boolean useNormKeeper) {
-		super(adapter);
+	public ForwardNormPlanner(DomainProblemAdapter adapter, boolean useNormKeeper, Set<? extends Norm> norms) {
+		super(adapter, norms);
 		this.useNormKeeper = useNormKeeper;
 	}
 
@@ -48,9 +51,9 @@ class ForwardNormPlanner extends NormPlanner {
 		STRIPSState completeInitState = adapter.getJavaffParser().getCompleteInitState();
 		NormSearchNode searchNode;
 		if(useNormKeeper) {
-			searchNode = new NormKeeperSearchNode(completeInitState, adapter.getNormAdapter().getLtlNorms());
+			searchNode = new NormKeeperSearchNode(completeInitState, norms);
 		} else {
-			searchNode = new RuntimeNormSearchNode(completeInitState, adapter.getNormAdapter().getLtlNorms());
+			searchNode = new RuntimeNormSearchNode(completeInitState, norms);
 		}
 
 		if(goalGroundFact.isTrue(completeInitState)) {

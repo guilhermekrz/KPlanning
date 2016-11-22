@@ -1,4 +1,4 @@
-(define (problem pb2)
+(define (problem pb21)
   (:domain drinkanddrive-constraints)
   (:requirements :strips :typing :negative-preconditions :constraints :preferences)
   (:objects
