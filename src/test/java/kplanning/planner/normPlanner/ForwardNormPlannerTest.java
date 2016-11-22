@@ -12,52 +12,51 @@ import static org.junit.Assert.assertEquals;
 // TODO: add large problems
 public class ForwardNormPlannerTest {
 
+	private void testWithAndWithoutNormKeeper(DomainProblemAdapter adapter, Plan plan1, Plan plan2) {
+		ForwardNormPlanner planner1 = new ForwardNormPlanner(adapter, false);
+		ForwardNormPlanner planner2 = new ForwardNormPlanner(adapter, true);
+
+		PlanSolution planSolution11 = planner1.planNormCompliant();
+		PlanSolution planSolution12 = planner2.planNormCompliant();
+		if(plan1 == null) {
+			assertEquals(plan1, planSolution11);
+			assertEquals(plan1, planSolution12);
+		} else {
+			assertEquals(plan1, planSolution11.getPlan());
+			assertEquals(plan1, planSolution12.getPlan());
+		}
+
+		PlanSolution planSolution21 = planner1.planNormViolation();
+		PlanSolution planSolution22 = planner2.planNormViolation();
+		assertEquals(plan2, planSolution21.getPlan());
+		assertEquals(plan2, planSolution22.getPlan());
+	}
+
 	@Test
 	public void testDrinkAndDriveNorms11() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 11));
-		ForwardNormPlanner planner = new ForwardNormPlanner(adapter);
-
-		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(null, planSolution1);
-
-		PlanSolution planSolution2 = planner.planNormViolation();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "move a b"), planSolution2.getPlan());
+		testWithAndWithoutNormKeeper(adapter, null, Plan.newPlanFromStringActions(adapter, "move a b"));
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms12() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 12));
-		ForwardNormPlanner planner = new ForwardNormPlanner(adapter);
-
-		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "move a b"), planSolution1.getPlan());
-
-		PlanSolution planSolution2 = planner.planNormViolation();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"), planSolution2.getPlan());
+		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move a b"),
+				Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"));
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms13() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 13));
-		ForwardNormPlanner planner = new ForwardNormPlanner(adapter);
-
-		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"), planSolution1.getPlan());
-
-		PlanSolution planSolution2 = planner.planNormViolation();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "move a b"), planSolution2.getPlan());
+		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"),
+				Plan.newPlanFromStringActions(adapter, "move a b"));
 	}
 
 	@Test
 	public void testDrinkAndDriveNorms14() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 14));
-		ForwardNormPlanner planner = new ForwardNormPlanner(adapter);
-
-		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "move b a", "enter a bara", "drink bara", "exit a bara"), planSolution1.getPlan());
-
-		PlanSolution planSolution2 = planner.planNormViolation();
-		assertEquals(Plan.newPlanFromStringActions(adapter, "move b a"), planSolution2.getPlan());
+		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move b a", "enter a bara", "drink bara", "exit a bara"),
+				Plan.newPlanFromStringActions(adapter, "move b a"));
 	}
 
 //	@Test
