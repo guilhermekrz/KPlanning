@@ -15,7 +15,7 @@ public class GraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		GraphplanNormPlanner planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getConditionalNorms());
 		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(null, planSolution1);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution1);
 	}
 
 	@Test
@@ -23,7 +23,7 @@ public class GraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 2), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		GraphplanNormPlanner planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getConditionalNorms());
 		PlanSolution planSolution1 = planner.planNormCompliant();
-		assertEquals(null, planSolution1);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution1);
 	}
 
 	@Test

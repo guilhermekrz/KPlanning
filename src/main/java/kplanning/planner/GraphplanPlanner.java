@@ -3,6 +3,7 @@ package kplanning.planner;
 import kplanning.DomainProblemAdapter;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.graphplan.PlanningGraph;
+import org.jetbrains.annotations.NotNull;
 
 // Assumption: Close-world
 public class GraphplanPlanner extends Planner {
@@ -14,15 +15,16 @@ public class GraphplanPlanner extends Planner {
 		this.planningGraph = new PlanningGraph(adapter);
 	}
 
+	@NotNull
 	@Override
-	public PlanSolution plan(boolean foundAllSolutions, int levels) {
+	public PlanSolution internalPlan(boolean foundAllSolutions, int levels) {
 		if(!foundAllSolutions && levels > 0) {
 			throw new IllegalStateException("If found all solutions is false, then levels should be zero");
 		}
 		while(true) {
 			if(planningGraph.isGoalPossible()) {
 				PlanSolution planSolution = planningGraph.extractSolution(foundAllSolutions);
-				if(planSolution != null) {
+				if(planSolution.hasSolution()) {
 					if(levels == 0) {
 						return planSolution;
 					} else {
@@ -35,7 +37,7 @@ public class GraphplanPlanner extends Planner {
 				}
 			}
 			if(planningGraph.hasLevelledOff()) {
-				return null;
+				return PlanSolution.getNoSolutionPlanSolution(adapter);
 			}
 			planningGraph.expandGraph();
 		}

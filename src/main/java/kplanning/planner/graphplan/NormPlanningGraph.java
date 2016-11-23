@@ -7,6 +7,7 @@ import kplanning.norm.ConditionalNorm;
 import kplanning.norm.LtlNorm;
 import kplanning.norm.Norm;
 import org.jetbrains.annotations.Nullable;
+import org.pmw.tinylog.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
@@ -20,6 +21,18 @@ public class NormPlanningGraph extends PlanningGraph {
 		super(adapter);
 		this.returnNormCompliantPlans = true;
 		this.norms = norms;
+	}
+
+	@Override
+	public boolean hasLevelledOff() {
+		boolean hasLevelledOff = super.hasLevelledOff();
+		if(!hasLevelledOff && !returnNormCompliantPlans) {
+			if(getCurrentLevel() > 200) {
+				Logger.debug("Could not find a solution - Reached maximum level 200");
+				hasLevelledOff = true;
+			}
+		}
+		return hasLevelledOff;
 	}
 
 	public void setReturnNormCompliantPlans(boolean returnNormCompliantPlans) {
@@ -127,7 +140,7 @@ public class NormPlanningGraph extends PlanningGraph {
 						}
 					} else {
 						// If we have not found a solution, then this new subgoals are "noGoods" at the previous level
-						previousStateLevel.addNoGood(newSubgoalFacts);
+						addNoGoods(previousStateLevel, newSubgoalFacts);
 					}
 				}
 			}

@@ -184,9 +184,9 @@ class StateLevel {
 		return noGoods.contains(new HashSet<>(subgoalFacts));
 	}
 
-	void addNoGood(List<Fact> subgoalFacts) {
-		noGoods.add(new HashSet<>(subgoalFacts));
+	boolean addNoGood(List<Fact> subgoalFacts) {
 //		Logger.debug("Adding NoGoods - Level {} with subgoals {}", level, subgoalFacts);
+		return noGoods.add(new HashSet<>(subgoalFacts));
 	}
 
 	/**

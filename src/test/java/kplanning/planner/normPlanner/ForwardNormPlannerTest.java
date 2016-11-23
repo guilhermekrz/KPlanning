@@ -22,8 +22,8 @@ public class ForwardNormPlannerTest {
 		PlanSolution planSolution11 = planner1.planNormCompliant();
 		PlanSolution planSolution12 = planner2.planNormCompliant();
 		if(plan1 == null) {
-			assertEquals(plan1, planSolution11);
-			assertEquals(plan1, planSolution12);
+			assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution11);
+			assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution12);
 		} else {
 			assertEquals(plan1, planSolution11.getPlan());
 			assertEquals(plan1, planSolution12.getPlan());

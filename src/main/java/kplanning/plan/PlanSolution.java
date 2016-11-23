@@ -4,6 +4,9 @@ import javaff.data.Action;
 import kplanning.DomainProblemAdapter;
 import kplanning.norm.Norm;
 import kplanning.util.SetUtil;
+import kplanning.util.statistic.Statistic;
+import kplanning.util.statistic.TimeStatistic;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -12,6 +15,12 @@ public class PlanSolution {
 	private DomainProblemAdapter adapter;
 	private Set<List<Set<Action>>> solutions;
 	private Set<Plan> plans;
+	private List<Statistic> statistics;
+	private PlanSolutionType planSolutionType;
+
+	private enum PlanSolutionType {
+		PARALLEL_SOLUTIONS, SEQUENTIAL_SOLUTIONS, NO_SOLUTION
+	}
 
 	public PlanSolution(DomainProblemAdapter adapter, List<List<Set<Action>>> solutions) {
 		this.adapter = adapter;
@@ -25,15 +34,32 @@ public class PlanSolution {
 			}
 			this.solutions.add(solutionWithoutNoOp);
 		}
+		this.statistics = new ArrayList<>();
+		this.planSolutionType = PlanSolutionType.PARALLEL_SOLUTIONS;
 	}
 
 	public PlanSolution(DomainProblemAdapter adapter, Set<Plan> plans) {
 		this.adapter = adapter;
 		this.plans = plans;
+		this.statistics = new ArrayList<>();
+		this.planSolutionType = PlanSolutionType.SEQUENTIAL_SOLUTIONS;
 	}
 
 	public PlanSolution(DomainProblemAdapter adapter, Plan plan) {
 		this(adapter, new HashSet<>(Collections.singletonList(plan)));
+	}
+
+	private static PlanSolution noSolutionPlanSolution;
+	public static PlanSolution getNoSolutionPlanSolution(DomainProblemAdapter adapter) {
+		if(noSolutionPlanSolution == null) {
+			noSolutionPlanSolution = new PlanSolution(adapter, new HashSet<>());
+			noSolutionPlanSolution.planSolutionType = PlanSolutionType.NO_SOLUTION;
+		}
+		return noSolutionPlanSolution;
+	}
+
+	public boolean hasSolution() {
+		return !planSolutionType.equals(PlanSolutionType.NO_SOLUTION);
 	}
 
 	@Nullable
@@ -103,7 +129,7 @@ public class PlanSolution {
 	 * Norm related
 	 */
 
-	@Nullable
+	@NotNull
 	public PlanSolution filterPlansBasedOnNorms(Set<? extends Norm> norms, boolean returnCompliantPlans) {
 		Set<Plan> plans = new HashSet<>();
 		for(Plan plan : getPlans()) {
@@ -122,10 +148,27 @@ public class PlanSolution {
 		}
 
 		if(plans.isEmpty()) {
-			return null;
+			return PlanSolution.getNoSolutionPlanSolution(adapter);
 		} else {
 			return new PlanSolution(adapter, plans);
 		}
+	}
+
+	/**
+	 * Statistics
+	 */
+
+	public void addStatistic(Statistic statistic) {
+		this.statistics.add(statistic);
+	}
+
+	public double getDoubleTime() {
+		for(Statistic statistic : statistics) {
+			if(statistic instanceof TimeStatistic) {
+				return ((TimeStatistic) statistic).getDiff();
+			}
+		}
+		throw new IllegalStateException("TimeStatistic does not exist");
 	}
 
 	/**
@@ -143,7 +186,7 @@ public class PlanSolution {
 	@Override
 	public String toString() {
 		String s;
-		if(solutions != null) {
+		if(planSolutionType.equals(PlanSolutionType.PARALLEL_SOLUTIONS)) {
 			s = "Found " + solutions.size() + " high-level solutions:\n";
 			boolean shouldAddNewLine = false;
 			for (List<Set<Action>> solution : solutions) {
@@ -157,7 +200,7 @@ public class PlanSolution {
 					s += "\t" + set;
 				}
 			}
-		} else {
+		} else if(planSolutionType.equals(PlanSolutionType.SEQUENTIAL_SOLUTIONS)) {
 			s = "Found " + plans.size() + " high-level solutions:\n";
 			boolean shouldAddNewLine = false;
 			for (Plan plan : plans) {
@@ -168,6 +211,10 @@ public class PlanSolution {
 				}
 				s += "\t" + plan;
 			}
+		} else if(planSolutionType.equals(PlanSolutionType.NO_SOLUTION)) {
+			s = "No solutions found";
+		} else {
+			s = "Unknown planSolutionType: " + planSolutionType;
 		}
 		return s;
 	}

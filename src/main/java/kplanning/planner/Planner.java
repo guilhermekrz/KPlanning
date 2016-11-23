@@ -2,9 +2,9 @@ package kplanning.planner;
 
 import kplanning.DomainProblemAdapter;
 import kplanning.plan.PlanSolution;
-import org.jetbrains.annotations.Nullable;
+import kplanning.util.statistic.TimeStatistic;
+import org.jetbrains.annotations.NotNull;
 
-// TODO: make this more generic, to be able to use JavaGP under this (return multiple plans? IDK) - and JavaFF?
 public abstract class Planner {
 	protected DomainProblemAdapter adapter;
 
@@ -12,16 +12,26 @@ public abstract class Planner {
 		this.adapter = adapter;
 	}
 
-	@Nullable
+	@NotNull
 	public PlanSolution plan() {
 		return plan(false);
 	}
 
-	@Nullable
+	@NotNull
 	public PlanSolution plan(boolean foundAllSolutions) {
 		return plan(foundAllSolutions, 0);
 	}
 
-	@Nullable
-	public abstract PlanSolution plan(boolean foundAllSolutions, int levels);
+	@NotNull
+	public final PlanSolution plan(boolean foundAllSolutions, int levels) {
+		TimeStatistic timeStatistic = new TimeStatistic();
+		timeStatistic.init();
+		PlanSolution planSolution = internalPlan(foundAllSolutions, levels);
+		timeStatistic.stop();
+		planSolution.addStatistic(timeStatistic);
+		return planSolution;
+	}
+
+	@NotNull
+	public abstract PlanSolution internalPlan(boolean foundAllSolutions, int levels);
 }

@@ -6,18 +6,20 @@ import kplanning.bitset.BitSetAction;
 import kplanning.bitset.BitSetFact;
 import kplanning.plan.Plan;
 import kplanning.plan.PlanSolution;
+import org.jetbrains.annotations.NotNull;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
-public class BFSSearchPlanner extends Planner {
+class BFSSearchPlanner extends Planner {
 
-	public BFSSearchPlanner(DomainProblemAdapter adapter) {
+	BFSSearchPlanner(DomainProblemAdapter adapter) {
 		super(adapter);
 	}
 
+	@NotNull
 	@Override
-	public PlanSolution plan(boolean foundAllSolutions, int levels) {
+	public PlanSolution internalPlan(boolean foundAllSolutions, int levels) {
 		if(foundAllSolutions || levels > 0) {
 			// TODO: implement found all solutions to bfs search
 			throw new NotImplementedException();
@@ -37,7 +39,7 @@ public class BFSSearchPlanner extends Planner {
 
 		while(true) {
 			if(frontier.isEmpty()) {
-				return null;
+				return PlanSolution.getNoSolutionPlanSolution(adapter);
 			}
 			searchNode = frontier.remove(0);
 			explored.add(searchNode.getState());

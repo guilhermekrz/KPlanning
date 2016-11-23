@@ -7,7 +7,7 @@ import kplanning.DomainProblemAdapter;
 import kplanning.norm.Norm;
 import kplanning.plan.Plan;
 import kplanning.plan.PlanSolution;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashSet;
@@ -15,7 +15,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 // Solution from the other paper is quite clever, because it uses the already implemented mechanism to perform this...
-class ForwardNormPlanner extends NormPlanner {
+public class ForwardNormPlanner extends NormPlanner {
 
 	private boolean useNormKeeper = false;
 
@@ -25,21 +25,21 @@ class ForwardNormPlanner extends NormPlanner {
 	}
 
 	@Override
-	public @Nullable PlanSolution planNormCompliant(boolean foundAllSolutions, int levels) {
+	public @NotNull PlanSolution internalPlanNormCompliant(boolean foundAllSolutions, int levels) {
 		return planNormAware(foundAllSolutions, levels, true);
 	}
 
 	@Override
-	public @Nullable PlanSolution planNormViolation(boolean foundAllSolutions, int levels) {
+	public @NotNull PlanSolution internalPlanNormViolation(boolean foundAllSolutions, int levels) {
 		return planNormAware(foundAllSolutions, levels, false);
 	}
 
 	@Override
-	public @Nullable PlanSolution plan(boolean foundAllSolutions, int levels) {
+	public @NotNull PlanSolution internalPlan(boolean foundAllSolutions, int levels) {
 		throw new NotImplementedException();
 	}
 
-	private @Nullable PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
+	private @NotNull PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
 		if(foundAllSolutions || levels > 0) {
 			// TODO: implement found all solutions to bfs search
 			throw new NotImplementedException();
@@ -67,7 +67,7 @@ class ForwardNormPlanner extends NormPlanner {
 
 		while(true) {
 			if(frontier.isEmpty()) {
-				return null;
+				return PlanSolution.getNoSolutionPlanSolution(adapter);
 			}
 			searchNode = frontier.remove();
 			explored.add(searchNode.getState());
@@ -107,8 +107,6 @@ class ForwardNormPlanner extends NormPlanner {
 	}
 
 	private PlanSolution solution(NormSearchNode searchNode) {
-		// TODO: return this NormKeeper in Plan Solution!!!
-//		System.out.println(searchNode.getNormKeeper());
 		return new PlanSolution(adapter, Plan.newPlanFromActions(searchNode.getActions(), adapter));
 	}
 }

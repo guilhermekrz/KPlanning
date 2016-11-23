@@ -9,6 +9,7 @@ import javaff.data.strips.STRIPSInstantAction;
 import kplanning.DomainProblemAdapter;
 import kplanning.plan.PlanSolution;
 import kplanning.plan.PlanUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pmw.tinylog.Logger;
 
@@ -122,6 +123,7 @@ public class PlanningGraph {
 		if(getCurrentLevel() == 0 || getCurrentLevel() == 1) {
 			return false;
 		}
+
 		StateLevel previousStateLevel = stateLevels.get(stateLevels.size() - 2);
 		StateLevel currentStateLevel = stateLevels.get(stateLevels.size() - 1);
 		ActionLevel previousActionLevel = actionLevels.get(actionLevels.size() - 2);
@@ -132,6 +134,7 @@ public class PlanningGraph {
 		Logger.debug("Graph has levelled off at level {}? {} - # noGoods  {} -> {} - # mutex {} -> {}",
 				getCurrentLevel(), hasLevelledOff, previousStateLevel.getNumberOfNoGoods(), currentStateLevel.getNumberOfNoGoods(),
 				previousActionLevel.getNumberOfMutexes(), currentActionLevel.getNumberOfMutexes());
+
 		if(hasLevelledOff) {
 			Logger.debug("Could not find a solution");
 		}
@@ -174,7 +177,7 @@ public class PlanningGraph {
 	 * Extract solution
 	 */
 
-	@Nullable
+	@NotNull
 	public PlanSolution extractSolution(boolean foundAllSolutions) {
 		Set<Fact> subgoalFacts = adapter.getJavaffParser().getGroundProblem().getGoal().getFacts();
 		List<Fact> subgoalFactsList = new ArrayList<>(subgoalFacts);
@@ -187,8 +190,8 @@ public class PlanningGraph {
 			return planSolution;
 		} else {
 			Logger.debug("Extract solution did NOT found solution at level {}", getCurrentLevel());
-			getLastStateLevel().addNoGood(subgoalFactsList);
-			return null;
+			addNoGoods(getLastStateLevel(), subgoalFactsList);
+			return PlanSolution.getNoSolutionPlanSolution(adapter);
 		}
 	}
 
@@ -252,7 +255,7 @@ public class PlanningGraph {
 					}
 				} else {
 					// If we have not found a solution, then this new subgoals are "noGoods" at the previous level
-					previousStateLevel.addNoGood(newSubgoalFacts);
+					addNoGoods(previousStateLevel, newSubgoalFacts);
 				}
 			}
 
@@ -309,6 +312,10 @@ public class PlanningGraph {
 				return null;
 			}
 		}
+	}
+
+	void addNoGoods(StateLevel stateLevel, List<Fact> subgoalFacts) {
+		stateLevel.addNoGood(subgoalFacts);
 	}
 
 	private void sortFacts(boolean foundAllSolutions, int level, List<Fact> subgoalFacts) {
@@ -376,7 +383,7 @@ public class PlanningGraph {
 	 * Utils
 	 */
 
-	private int getCurrentLevel() {
+	int getCurrentLevel() {
 		return stateLevels.size() - 1;
 	}
 

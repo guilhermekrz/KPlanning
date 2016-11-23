@@ -14,7 +14,7 @@ public class NaiveGraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 1), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getConditionalNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
-		assertEquals(null, planSolution);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}
 
 	@Test
@@ -22,7 +22,7 @@ public class NaiveGraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 11));
 		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
-		assertEquals(null, planSolution);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class NaiveGraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive", 2), "planning-examples/drinkanddrive/pb1.conditionalNorms");
 		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getConditionalNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
-		assertEquals(null, planSolution);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class NaiveGraphplanNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 31));
 		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
-		assertEquals(null, planSolution);
+		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}
 
 }
