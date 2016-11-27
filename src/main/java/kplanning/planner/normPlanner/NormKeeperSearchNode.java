@@ -3,7 +3,7 @@ package kplanning.planner.normPlanner;
 import fr.uga.pddl4j.parser.Connective;
 import javaff.data.Action;
 import javaff.planning.STRIPSState;
-import kplanning.norm.LtlNorm;
+import kplanning.norm.GroundLtlNorm;
 import kplanning.norm.Norm;
 
 import java.util.HashSet;
@@ -52,9 +52,9 @@ public class NormKeeperSearchNode extends NormSearchNode {
 	}
 
 	private class NormKeeper {
-		Set<LtlNorm> actualLtlNorms;
-		Set<LtlNorm> curretlyiolationNorms;
-		Set<LtlNorm> abolsuteViolationNorms;
+		Set<GroundLtlNorm> actualGroundLtlNorms;
+		Set<GroundLtlNorm> curretlyiolationNorms;
+		Set<GroundLtlNorm> abolsuteViolationNorms;
 
 		NormKeeper() {
 			this(true);
@@ -62,18 +62,18 @@ public class NormKeeperSearchNode extends NormSearchNode {
 
 		private NormKeeper(boolean init) {
 			if(init) {
-				actualLtlNorms = new HashSet<>();
+				actualGroundLtlNorms = new HashSet<>();
 				curretlyiolationNorms = new HashSet<>();
 				abolsuteViolationNorms = new HashSet<>();
 
 				for(Norm norm : norms) {
-					if(norm instanceof LtlNorm) {
-						LtlNorm ltlNorm = (LtlNorm) norm;
-						if(ltlNorm.getConnective().equals(Connective.ALWAYS)
-								|| ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
-							actualLtlNorms.add(ltlNorm);
-						} else if(ltlNorm.getConnective().equals(Connective.SOMETIME)) {
-							curretlyiolationNorms.add(ltlNorm);
+					if(norm instanceof GroundLtlNorm) {
+						GroundLtlNorm groundLtlNorm = (GroundLtlNorm) norm;
+						if(groundLtlNorm.getConnective().equals(Connective.ALWAYS)
+								|| groundLtlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
+							actualGroundLtlNorms.add(groundLtlNorm);
+						} else if(groundLtlNorm.getConnective().equals(Connective.SOMETIME)) {
+							curretlyiolationNorms.add(groundLtlNorm);
 						}
 					} else {
 						throw new IllegalStateException("NormKeeperSearchNode only deals with LTLNorms");
@@ -84,29 +84,29 @@ public class NormKeeperSearchNode extends NormSearchNode {
 
 		void update(STRIPSState newState) {
 			// Add to pending violation
-			for(LtlNorm ltlNorm : actualLtlNorms) {
-				if(ltlNorm.getConnective().equals(Connective.ALWAYS)) {
-					curretlyiolationNorms.add(ltlNorm);
+			for(GroundLtlNorm groundLtlNorm : actualGroundLtlNorms) {
+				if(groundLtlNorm.getConnective().equals(Connective.ALWAYS)) {
+					curretlyiolationNorms.add(groundLtlNorm);
 				}
 			}
 
 			// Update norms
-			Set<LtlNorm> newAbsoluteViolations = new HashSet<>();
-			Set<LtlNorm> newNotViolations = new HashSet<>();
-			for(LtlNorm ltlNorm : curretlyiolationNorms) {
-				if(ltlNorm.getConnective().equals(Connective.ALWAYS)) {
-					if(ltlNorm.isOTrue(newState)) {
-						newNotViolations.add(ltlNorm);
+			Set<GroundLtlNorm> newAbsoluteViolations = new HashSet<>();
+			Set<GroundLtlNorm> newNotViolations = new HashSet<>();
+			for(GroundLtlNorm groundLtlNorm : curretlyiolationNorms) {
+				if(groundLtlNorm.getConnective().equals(Connective.ALWAYS)) {
+					if(groundLtlNorm.isOTrue(newState)) {
+						newNotViolations.add(groundLtlNorm);
 					} else {
-						newAbsoluteViolations.add(ltlNorm);
+						newAbsoluteViolations.add(groundLtlNorm);
 					}
-				} else if(ltlNorm.getConnective().equals(Connective.SOMETIME)) {
-					if(ltlNorm.isOTrue(newState)) {
-						newNotViolations.add(ltlNorm);
+				} else if(groundLtlNorm.getConnective().equals(Connective.SOMETIME)) {
+					if(groundLtlNorm.isOTrue(newState)) {
+						newNotViolations.add(groundLtlNorm);
 					}
-				} else if(ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
-					if(ltlNorm.isVTrue(newState)) {
-						newNotViolations.add(ltlNorm);
+				} else if(groundLtlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
+					if(groundLtlNorm.isVTrue(newState)) {
+						newNotViolations.add(groundLtlNorm);
 					}
 				}
 			}
@@ -116,10 +116,10 @@ public class NormKeeperSearchNode extends NormSearchNode {
 			abolsuteViolationNorms.addAll(newAbsoluteViolations);
 
 			// Add to currently violation
-			for(LtlNorm ltlNorm : actualLtlNorms) {
-				if(ltlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
-					if(ltlNorm.isOTrue(newState)) {
-						curretlyiolationNorms.add(ltlNorm);
+			for(GroundLtlNorm groundLtlNorm : actualGroundLtlNorms) {
+				if(groundLtlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
+					if(groundLtlNorm.isOTrue(newState)) {
+						curretlyiolationNorms.add(groundLtlNorm);
 					}
 				}
 			}
@@ -135,7 +135,7 @@ public class NormKeeperSearchNode extends NormSearchNode {
 
 		protected NormKeeper getCopy() {
 			NormKeeper normKeeper = new NormKeeper(false);
-			normKeeper.actualLtlNorms = new HashSet<>(this.actualLtlNorms);
+			normKeeper.actualGroundLtlNorms = new HashSet<>(this.actualGroundLtlNorms);
 			normKeeper.abolsuteViolationNorms = new HashSet<>(this.abolsuteViolationNorms);
 			normKeeper.curretlyiolationNorms = new HashSet<>(this.curretlyiolationNorms);
 			return normKeeper;

@@ -111,7 +111,7 @@ public class GenerateExperiments {
 					if(runConditional) {
 						planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundConditionalNorms());
 					} else {
-						planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
+						planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
 					PlanSolution planSolution;
@@ -137,7 +137,7 @@ public class GenerateExperiments {
 					if(runConditional) {
 						planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundConditionalNorms());
 					} else {
-						planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
+						planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
 					PlanSolution planSolution;
@@ -163,7 +163,7 @@ public class GenerateExperiments {
 					if(runConditional) {
 						planner = new ForwardNormPlanner(adapter, false, adapter.getNormAdapter().getGroundConditionalNorms());
 					} else {
-						planner = new ForwardNormPlanner(adapter, false, adapter.getNormAdapter().getLtlNorms());
+						planner = new ForwardNormPlanner(adapter, false, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
 					PlanSolution planSolution;
@@ -190,7 +190,7 @@ public class GenerateExperiments {
 					if(runConditional) {
 						planner = new ForwardNormPlanner(adapter, true, adapter.getNormAdapter().getGroundConditionalNorms());
 					} else {
-						planner = new ForwardNormPlanner(adapter, true, adapter.getNormAdapter().getLtlNorms());
+						planner = new ForwardNormPlanner(adapter, true, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
 					PlanSolution planSolution;

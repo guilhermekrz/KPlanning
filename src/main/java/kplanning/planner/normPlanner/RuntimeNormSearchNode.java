@@ -3,7 +3,7 @@ package kplanning.planner.normPlanner;
 import fr.uga.pddl4j.parser.Connective;
 import javaff.data.Action;
 import javaff.planning.STRIPSState;
-import kplanning.norm.LtlNorm;
+import kplanning.norm.GroundLtlNorm;
 import kplanning.norm.Norm;
 
 import java.util.List;
@@ -42,27 +42,27 @@ class RuntimeNormSearchNode extends NormSearchNode {
 			isCurrentlyViolation = false;
 			for(Norm norm : norms) {
 				if(norm.isViolationPlan(states, actions)) {
-					if(norm instanceof LtlNorm) {
-						LtlNorm ltlNorm = (LtlNorm) norm;
-						if (ltlNorm.getConnective() == Connective.ALWAYS) {
+					if(norm instanceof GroundLtlNorm) {
+						GroundLtlNorm groundLtlNorm = (GroundLtlNorm) norm;
+						if (groundLtlNorm.getConnective() == Connective.ALWAYS) {
 							isCurrentlyViolation = true;
 							isAbsoluteViolation = true;
 							break;
-						} else if (ltlNorm.getConnective() == Connective.AT_END) {
+						} else if (groundLtlNorm.getConnective() == Connective.AT_END) {
 							isCurrentlyViolation = true;
-						} else if (ltlNorm.getConnective() == Connective.SOMETIME) {
+						} else if (groundLtlNorm.getConnective() == Connective.SOMETIME) {
 							isCurrentlyViolation = true;
-						} else if (ltlNorm.getConnective() == Connective.AT_MOST_ONCE) {
-							isCurrentlyViolation = true;
-							isAbsoluteViolation = true;
-							break;
-						} else if (ltlNorm.getConnective() == Connective.SOMETIME_AFTER) {
-							isCurrentlyViolation = true;
-						} else if (ltlNorm.getConnective() == Connective.SOMETIME_BEFORE) {
+						} else if (groundLtlNorm.getConnective() == Connective.AT_MOST_ONCE) {
 							isCurrentlyViolation = true;
 							isAbsoluteViolation = true;
 							break;
-						} else if (ltlNorm.getConnective() == Connective.ALWAYS_WITHIN) {
+						} else if (groundLtlNorm.getConnective() == Connective.SOMETIME_AFTER) {
+							isCurrentlyViolation = true;
+						} else if (groundLtlNorm.getConnective() == Connective.SOMETIME_BEFORE) {
+							isCurrentlyViolation = true;
+							isAbsoluteViolation = true;
+							break;
+						} else if (groundLtlNorm.getConnective() == Connective.ALWAYS_WITHIN) {
 							isCurrentlyViolation = true;
 						}
 					} else {

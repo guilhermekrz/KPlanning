@@ -39,7 +39,7 @@ public class ForwardNormPlannerTest {
 	public void testDrinkAndDriveNorms11() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 11));
 		testWithAndWithoutNormKeeper(adapter, null, Plan.newPlanFromStringActions(adapter, "move a b"),
-				adapter.getNormAdapter().getLtlNorms());
+				adapter.getNormAdapter().getGroundLtlNorms());
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ForwardNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 12));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move a b"),
 				Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"),
-				adapter.getNormAdapter().getLtlNorms());
+				adapter.getNormAdapter().getGroundLtlNorms());
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class ForwardNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 13));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "enter a bara", "drink bara", "exit a bara", "move a b"),
 				Plan.newPlanFromStringActions(adapter, "move a b"),
-				adapter.getNormAdapter().getLtlNorms());
+				adapter.getNormAdapter().getGroundLtlNorms());
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class ForwardNormPlannerTest {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 14));
 		testWithAndWithoutNormKeeper(adapter, Plan.newPlanFromStringActions(adapter, "move b a", "enter a bara", "drink bara", "exit a bara"),
 				Plan.newPlanFromStringActions(adapter, "move b a"),
-				adapter.getNormAdapter().getLtlNorms());
+				adapter.getNormAdapter().getGroundLtlNorms());
 	}
 
 //	@Test

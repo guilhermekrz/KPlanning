@@ -8,7 +8,7 @@ import kplanning.DomainProblemAdapter;
 
 import java.util.List;
 
-public class LtlNorm extends Norm {
+public class GroundLtlNorm extends Norm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 
@@ -18,7 +18,7 @@ public class LtlNorm extends Norm {
 	private CompoundLiteral o;
 	private CompoundLiteral v;
 
-	public LtlNorm(DomainProblemAdapter adapter, NormModality normModality, String prefName, Connective connective, int t, CompoundLiteral o, CompoundLiteral v) {
+	public GroundLtlNorm(DomainProblemAdapter adapter, NormModality normModality, String prefName, Connective connective, int t, CompoundLiteral o, CompoundLiteral v) {
 		this.adapter = adapter;
 		this.normModality = normModality;
 		if(this.normModality == NormModality.PROHIBITION) {

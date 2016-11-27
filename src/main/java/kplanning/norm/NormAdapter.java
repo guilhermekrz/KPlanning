@@ -2,7 +2,6 @@ package kplanning.norm;
 
 import fr.uga.pddl4j.parser.Connective;
 import fr.uga.pddl4j.parser.Exp;
-import jason.stdlib.ground;
 import javaff.data.Action;
 import javaff.data.CompoundLiteral;
 import javaff.data.strips.And;
@@ -25,7 +24,7 @@ public class NormAdapter {
 	private DomainProblemAdapter adapter;
 	private Set<ConditionalNorm> conditionalNorms;
 	private Set<GroundConditionalNorm> groundConditionalNorms;
-	private Set<LtlNorm> ltlNorms;
+	private Set<GroundLtlNorm> groundLtlNorms;
 
 	/**
 	 * Constructors
@@ -112,12 +111,12 @@ public class NormAdapter {
 	 * LTL norms
 	 */
 
-	public Set<LtlNorm> getLtlNorms() {
-		return ltlNorms;
+	public Set<GroundLtlNorm> getGroundLtlNorms() {
+		return groundLtlNorms;
 	}
 
 	private void populateLtlNorms() {
-		ltlNorms = new HashSet<>();
+		groundLtlNorms = new HashSet<>();
 		Exp constraints = adapter.getPddl4jParser().getParser().getProblem().getConstraints();
 		if(constraints != null && constraints.getConnective().equals(Connective.AND)) {
 			List<Exp> children = constraints.getChildren();
@@ -154,7 +153,7 @@ public class NormAdapter {
 					default:
 						throw new IllegalStateException("Connective not supported in constraints: " + child.getConnective());
 				}
-				ltlNorms.add(new LtlNorm(adapter, NormModality.OBLIGATION, child.getPrefName().getImage(), child.getConnective(), t, o, v));
+				groundLtlNorms.add(new GroundLtlNorm(adapter, NormModality.OBLIGATION, child.getPrefName().getImage(), child.getConnective(), t, o, v));
 			}
 		}
 	}

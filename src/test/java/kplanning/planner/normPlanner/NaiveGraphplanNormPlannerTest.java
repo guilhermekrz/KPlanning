@@ -20,7 +20,7 @@ public class NaiveGraphplanNormPlannerTest {
 	@Test
 	public void testDrinkAndDriveNorms1Ltl() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 11));
-		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
+		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundLtlNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
 		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}
@@ -36,7 +36,7 @@ public class NaiveGraphplanNormPlannerTest {
 	@Test
 	public void testDrinkAndDriveNorms2Ltl() {
 		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("drinkanddrive-constraints", 31));
-		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getLtlNorms());
+		NormPlanner planner = new NaiveGraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundLtlNorms());
 		PlanSolution planSolution = planner.planNormCompliant();
 		assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution);
 	}

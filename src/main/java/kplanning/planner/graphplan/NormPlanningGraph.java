@@ -5,7 +5,7 @@ import javaff.data.Fact;
 import kplanning.DomainProblemAdapter;
 import kplanning.norm.ConditionalNorm;
 import kplanning.norm.GroundConditionalNorm;
-import kplanning.norm.LtlNorm;
+import kplanning.norm.GroundLtlNorm;
 import kplanning.norm.Norm;
 import org.jetbrains.annotations.Nullable;
 import org.pmw.tinylog.Logger;
@@ -62,7 +62,7 @@ public class NormPlanningGraph extends PlanningGraph {
 						}
 					}
 				}
-			} else if(norm instanceof LtlNorm) {
+			} else if(norm instanceof GroundLtlNorm) {
 				// TODO: implement
 				throw new NotImplementedException();
 			} else {
@@ -98,7 +98,7 @@ public class NormPlanningGraph extends PlanningGraph {
 						return true;
 					}
 				}
-			} else if(norm instanceof LtlNorm) {
+			} else if(norm instanceof GroundLtlNorm) {
 				// TODO: implement
 				throw new NotImplementedException();
 			} else {

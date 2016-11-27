@@ -11,7 +11,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class LtlNormTest {
+public class GroundLtlNormTest {
 
 	private DomainProblemAdapter adapter;
 
@@ -30,10 +30,10 @@ public class LtlNormTest {
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at a"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testAlways", Connective.ALWAYS, -1, and, null);
-		assertFalse(ltlNorm.isViolationPlan(plan1));
-		assertFalse(ltlNorm.isViolationPlan(plan2));
-		assertTrue(ltlNorm.isViolationPlan(plan3));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testAlways", Connective.ALWAYS, -1, and, null);
+		assertFalse(groundLtlNorm.isViolationPlan(plan1));
+		assertFalse(groundLtlNorm.isViolationPlan(plan2));
+		assertTrue(groundLtlNorm.isViolationPlan(plan3));
 	}
 
 	// At End
@@ -46,10 +46,10 @@ public class LtlNormTest {
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at b"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testAtEnd", Connective.AT_END, -1, and, null);
-		assertTrue(ltlNorm.isViolationPlan(plan1));
-		assertTrue(ltlNorm.isViolationPlan(plan2));
-		assertFalse(ltlNorm.isViolationPlan(plan3));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testAtEnd", Connective.AT_END, -1, and, null);
+		assertTrue(groundLtlNorm.isViolationPlan(plan1));
+		assertTrue(groundLtlNorm.isViolationPlan(plan2));
+		assertFalse(groundLtlNorm.isViolationPlan(plan3));
 	}
 
 	// Sometime
@@ -65,13 +65,13 @@ public class LtlNormTest {
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("inbar bara"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testSometime", Connective.SOMETIME, -1, and, null);
-		assertTrue(ltlNorm.isViolationPlan(plan1));
-		assertTrue(ltlNorm.isViolationPlan(plan2));
-		assertTrue(ltlNorm.isViolationPlan(plan3));
-		assertFalse(ltlNorm.isViolationPlan(plan4));
-		assertFalse(ltlNorm.isViolationPlan(plan5));
-		assertFalse(ltlNorm.isViolationPlan(plan6));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testSometime", Connective.SOMETIME, -1, and, null);
+		assertTrue(groundLtlNorm.isViolationPlan(plan1));
+		assertTrue(groundLtlNorm.isViolationPlan(plan2));
+		assertTrue(groundLtlNorm.isViolationPlan(plan3));
+		assertFalse(groundLtlNorm.isViolationPlan(plan4));
+		assertFalse(groundLtlNorm.isViolationPlan(plan5));
+		assertFalse(groundLtlNorm.isViolationPlan(plan6));
 	}
 
 	// At Most Once
@@ -88,14 +88,14 @@ public class LtlNormTest {
 
 		And and = new And();
 		and.add(adapter.getJavaffParser().getFact("at a"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testAtMostOnce", Connective.AT_MOST_ONCE, -1, and, null);
-		assertFalse(ltlNorm.isViolationPlan(plan1));
-		assertFalse(ltlNorm.isViolationPlan(plan2));
-		assertFalse(ltlNorm.isViolationPlan(plan3));
-		assertTrue(ltlNorm.isViolationPlan(plan4));
-		assertTrue(ltlNorm.isViolationPlan(plan5));
-		assertTrue(ltlNorm.isViolationPlan(plan6));
-		assertTrue(ltlNorm.isViolationPlan(plan7));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testAtMostOnce", Connective.AT_MOST_ONCE, -1, and, null);
+		assertFalse(groundLtlNorm.isViolationPlan(plan1));
+		assertFalse(groundLtlNorm.isViolationPlan(plan2));
+		assertFalse(groundLtlNorm.isViolationPlan(plan3));
+		assertTrue(groundLtlNorm.isViolationPlan(plan4));
+		assertTrue(groundLtlNorm.isViolationPlan(plan5));
+		assertTrue(groundLtlNorm.isViolationPlan(plan6));
+		assertTrue(groundLtlNorm.isViolationPlan(plan7));
 	}
 
 	// Sometime After
@@ -112,14 +112,14 @@ public class LtlNormTest {
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at b"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at a"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testSometimeAfter", Connective.SOMETIME_AFTER, -1, o, v);
-		assertFalse(ltlNorm.isViolationPlan(plan1));
-		assertFalse(ltlNorm.isViolationPlan(plan2));
-		assertTrue(ltlNorm.isViolationPlan(plan3));
-		assertFalse(ltlNorm.isViolationPlan(plan4));
-		assertTrue(ltlNorm.isViolationPlan(plan5));
-		assertFalse(ltlNorm.isViolationPlan(plan6));
-		assertFalse(ltlNorm.isViolationPlan(plan7));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testSometimeAfter", Connective.SOMETIME_AFTER, -1, o, v);
+		assertFalse(groundLtlNorm.isViolationPlan(plan1));
+		assertFalse(groundLtlNorm.isViolationPlan(plan2));
+		assertTrue(groundLtlNorm.isViolationPlan(plan3));
+		assertFalse(groundLtlNorm.isViolationPlan(plan4));
+		assertTrue(groundLtlNorm.isViolationPlan(plan5));
+		assertFalse(groundLtlNorm.isViolationPlan(plan6));
+		assertFalse(groundLtlNorm.isViolationPlan(plan7));
 	}
 
 	// Sometime Before
@@ -136,14 +136,14 @@ public class LtlNormTest {
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at b"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at a")); v.add(adapter.getJavaffParser().getFact("drunk"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testSometimeBefore", Connective.SOMETIME_BEFORE, -1, o, v);
-		assertFalse(ltlNorm.isViolationPlan(plan1));
-		assertFalse(ltlNorm.isViolationPlan(plan2));
-		assertTrue(ltlNorm.isViolationPlan(plan3));
-		assertFalse(ltlNorm.isViolationPlan(plan4));
-		assertFalse(ltlNorm.isViolationPlan(plan5));
-		assertFalse(ltlNorm.isViolationPlan(plan6));
-		assertTrue(ltlNorm.isViolationPlan(plan7));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testSometimeBefore", Connective.SOMETIME_BEFORE, -1, o, v);
+		assertFalse(groundLtlNorm.isViolationPlan(plan1));
+		assertFalse(groundLtlNorm.isViolationPlan(plan2));
+		assertTrue(groundLtlNorm.isViolationPlan(plan3));
+		assertFalse(groundLtlNorm.isViolationPlan(plan4));
+		assertFalse(groundLtlNorm.isViolationPlan(plan5));
+		assertFalse(groundLtlNorm.isViolationPlan(plan6));
+		assertTrue(groundLtlNorm.isViolationPlan(plan7));
 	}
 
 	// Always Within
@@ -161,14 +161,14 @@ public class LtlNormTest {
 
 		And o = new And(); o.add(adapter.getJavaffParser().getFact("at a"));
 		And v = new And(); v.add(adapter.getJavaffParser().getFact("at b"));
-		LtlNorm ltlNorm = new LtlNorm(adapter, NormModality.OBLIGATION, "testAlwaysWithin", Connective.ALWAYS_WITHIN, 2, o, v);
-		assertTrue(ltlNorm.isViolationPlan(plan1));
-		assertTrue(ltlNorm.isViolationPlan(plan2));
-		assertFalse(ltlNorm.isViolationPlan(plan3));
-		assertTrue(ltlNorm.isViolationPlan(plan4));
-		assertTrue(ltlNorm.isViolationPlan(plan5));
-		assertTrue(ltlNorm.isViolationPlan(plan6));
-		assertTrue(ltlNorm.isViolationPlan(plan7));
-		assertFalse(ltlNorm.isViolationPlan(plan8));
+		GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, NormModality.OBLIGATION, "testAlwaysWithin", Connective.ALWAYS_WITHIN, 2, o, v);
+		assertTrue(groundLtlNorm.isViolationPlan(plan1));
+		assertTrue(groundLtlNorm.isViolationPlan(plan2));
+		assertFalse(groundLtlNorm.isViolationPlan(plan3));
+		assertTrue(groundLtlNorm.isViolationPlan(plan4));
+		assertTrue(groundLtlNorm.isViolationPlan(plan5));
+		assertTrue(groundLtlNorm.isViolationPlan(plan6));
+		assertTrue(groundLtlNorm.isViolationPlan(plan7));
+		assertFalse(groundLtlNorm.isViolationPlan(plan8));
 	}
 }

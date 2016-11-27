@@ -78,9 +78,9 @@ public class ForwardNormPlanner extends NormPlanner {
 
 					NormSearchNode childNode;
 					if(useNormKeeper) {
-						childNode = new NormKeeperSearchNode(searchNode, action, newState, adapter.getNormAdapter().getLtlNorms());
+						childNode = new NormKeeperSearchNode(searchNode, action, newState, adapter.getNormAdapter().getGroundLtlNorms());
 					} else {
-						childNode = new RuntimeNormSearchNode(searchNode, action, newState, adapter.getNormAdapter().getLtlNorms());
+						childNode = new RuntimeNormSearchNode(searchNode, action, newState, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
 					if (!frontier.contains(childNode) && !explored.contains(childNode.getState())) {
