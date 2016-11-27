@@ -4,6 +4,7 @@ import javaff.data.Action;
 import kplanning.DomainProblemAdapter;
 import kplanning.norm.Norm;
 import kplanning.util.SetUtil;
+import kplanning.util.statistic.MemoryStatistic;
 import kplanning.util.statistic.Statistic;
 import kplanning.util.statistic.TimeStatistic;
 import org.jetbrains.annotations.NotNull;
@@ -158,8 +159,25 @@ public class PlanSolution {
 	 * Statistics
 	 */
 
+	private boolean isTimeout;
+
+	public boolean isTimeout() {
+		return isTimeout;
+	}
+
+	public void setTimeout(boolean isTimeout) {
+		this.isTimeout = isTimeout;
+	}
+
 	public void addStatistic(Statistic statistic) {
 		this.statistics.add(statistic);
+	}
+
+	public String getTime() {
+		if(isTimeout) {
+			return "-";
+		}
+		return String.valueOf(getDoubleTime());
 	}
 
 	public double getDoubleTime() {
@@ -169,6 +187,15 @@ public class PlanSolution {
 			}
 		}
 		throw new IllegalStateException("TimeStatistic does not exist");
+	}
+
+	public double getMemoryMB() {
+		for(Statistic statistic : statistics) {
+			if(statistic instanceof MemoryStatistic) {
+				return ((MemoryStatistic) statistic).getMemoryInMb();
+			}
+		}
+		throw new IllegalStateException("MemoryStatistic does not exist");
 	}
 
 	/**

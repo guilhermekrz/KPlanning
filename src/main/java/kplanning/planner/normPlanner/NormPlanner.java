@@ -4,14 +4,22 @@ import kplanning.DomainProblemAdapter;
 import kplanning.norm.Norm;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.Planner;
+import kplanning.util.statistic.MemoryStatistic;
 import kplanning.util.statistic.TimeStatistic;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.Set;
+import java.util.concurrent.*;
 
 public abstract class NormPlanner extends Planner {
 
+	private static final int TIMEOUT_IN_SECONDS = 90;
+
 	Set<? extends Norm> norms;
+
+	// Temp variable
+	private PlanSolution planSolution;
 
 	NormPlanner(DomainProblemAdapter adapter, Set<? extends Norm> norms) {
 		super(adapter);
@@ -31,11 +39,40 @@ public abstract class NormPlanner extends Planner {
 
 	@NotNull
 	private PlanSolution planNormCompliant(boolean foundAllSolutions, int levels) {
+		MemoryStatistic memoryStatistic = new MemoryStatistic();
+		memoryStatistic.init();
 		TimeStatistic timeStatistic = new TimeStatistic();
 		timeStatistic.init();
-		PlanSolution planSolution = internalPlanNormCompliant(foundAllSolutions, levels);
+
+		// With timeout
+		final Duration timeout = Duration.ofSeconds(TIMEOUT_IN_SECONDS);
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		final Future handler = executor.submit(new Callable() {
+			@Override
+			public Void call() throws Exception {
+				NormPlanner.this.planSolution = internalPlanNormCompliant(foundAllSolutions, levels);
+				return null;
+			}
+		});
+
+		try {
+			handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException | OutOfMemoryError e) {
+			handler.cancel(true);
+			e.printStackTrace();
+			this.planSolution = PlanSolution.getNoSolutionPlanSolution(adapter);
+			this.planSolution.setTimeout(true);
+		}
+
+		executor.shutdownNow();
+		// With timeout
+
 		timeStatistic.stop();
+		memoryStatistic.stop();
+		planSolution.addStatistic(memoryStatistic);
 		planSolution.addStatistic(timeStatistic);
+
 		return planSolution;
 	}
 
@@ -55,11 +92,40 @@ public abstract class NormPlanner extends Planner {
 
 	@NotNull
 	private PlanSolution planNormViolation(boolean foundAllSolutions, int levels) {
+		MemoryStatistic memoryStatistic = new MemoryStatistic();
+		memoryStatistic.init();
 		TimeStatistic timeStatistic = new TimeStatistic();
 		timeStatistic.init();
-		PlanSolution planSolution = internalPlanNormViolation(foundAllSolutions, levels);
+
+		// With timeout
+		final Duration timeout = Duration.ofSeconds(TIMEOUT_IN_SECONDS);
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		final Future handler = executor.submit(new Callable() {
+			@Override
+			public Void call() throws Exception {
+				NormPlanner.this.planSolution = internalPlanNormViolation(foundAllSolutions, levels);
+				return null;
+			}
+		});
+
+		try {
+			handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException | OutOfMemoryError e) {
+			handler.cancel(true);
+			e.printStackTrace();
+			this.planSolution = PlanSolution.getNoSolutionPlanSolution(adapter);
+			this.planSolution.setTimeout(true);
+		}
+
+		executor.shutdownNow();
+		// With timeout
+
 		timeStatistic.stop();
+		memoryStatistic.stop();
+		planSolution.addStatistic(memoryStatistic);
 		planSolution.addStatistic(timeStatistic);
+
 		return planSolution;
 	}
 

@@ -187,6 +187,36 @@ public class JavaffParser {
 	}
 
 	/**
+	 * Check if facts is true in compound literal
+	 *
+	 * @param facts Set of Facts (true and false)
+	 * @param compoundLiteral Compound literal (generally AND)
+	 * @return true if facts contain all predicates from compound literal
+	 */
+	public boolean isTrue(Collection<Fact> facts, CompoundLiteral compoundLiteral) {
+		Iterator var2 = compoundLiteral.getCompoundFacts().iterator();
+
+		boolean res;
+		do {
+			if(!var2.hasNext()) {
+				return true;
+			}
+
+			Fact c = (Fact)var2.next();
+
+			if(c.isStatic()) {
+				res = true;
+			} else if(c instanceof Proposition) {
+				res = facts.contains(c);
+			} else if(c instanceof Not) {
+				res = facts.contains(c);
+			} else {
+				throw new IllegalArgumentException("STRIPSStates can only check whether Propositions or Nots are true");
+			}
+		} while(res);
+		return false;
+	}
+	/**
 	 * Miscellaneous - States
 	 */
 
@@ -219,27 +249,6 @@ public class JavaffParser {
 		}
 		STRIPSState stripsState = new STRIPSState(groundProblem.getActions(), trueFacts, falseFacts, groundProblem.getGoal());
 		return addMissingFluentFactsToStripsState(stripsState);
-	}
-
-	public Set<Fact> getTrueFacts(String stringFacts) {
-		Set<Fact> facts = new HashSet<>();
-
-		List<String> strings = Arrays.asList(stringFacts.trim().split(","));
-		for(String s:strings) {
-			List<String> strings1 = Arrays.asList(s.trim().split(" "));
-
-			if(strings1.get(0).trim().isEmpty()) {
-				// Empty
-				continue;
-			}
-
-			if(strings1.get(0).equals("not")) {
-				throw new IllegalStateException("getTrueFacts does not parse NOT facts");
-			} else {
-				facts.add(getProposition(strings1));
-			}
-		}
-		return facts;
 	}
 
 	public STRIPSState getRandomState() {

@@ -12,6 +12,7 @@ import java.util.*;
 
 public class GenerateProblems {
 	private static final String LS = System.lineSeparator();
+	private static final double PROBABILITY_OF_ADDING_RANDOM_EDGE = 0.1; // low values = harder problems
 
 //	public static void main(String[] args) {
 //		List<PredicateExclusive> predicateExclusives = new ArrayList<>();
@@ -28,13 +29,13 @@ public class GenerateProblems {
 		PredicateExclusive predicateExclusive = new PredicateExclusive(false);
 		predicateExclusive.addPredicateProbability(new PredicateProbability("in", 0.5, "bar"));
 		predicateExclusives.add(predicateExclusive);
-		generateAndWriteToFile("planning-examples/drinkanddrive-generated/", 5, 20, predicateExclusives, false, null);
+		generateAndWriteToFile("planning-examples/drinkanddrive-generated/", 5, 20, predicateExclusives, false, null, null);
 	}
 
-	public static void generateAndWriteToFile(String domainDir, int problemNumber, int numCities, List<PredicateExclusive> predicateExclusives, boolean skipFirstLast, Grid grid) {
+	public static void generateAndWriteToFile(String domainDir, int problemNumber, int numCities, List<PredicateExclusive> predicateExclusives, boolean skipFirstLast, Grid grid, String constraints) {
 		String[] split = domainDir.split("/");
 		String domainName = split[split.length-1];
-		String s = generateDrinkAndDriveProblem(domainName, problemNumber, numCities, predicateExclusives, skipFirstLast, grid);
+		String s = generateDrinkAndDriveProblem(domainName, problemNumber, numCities, predicateExclusives, skipFirstLast, grid, constraints);
 		try {
 			PrintWriter writer = new PrintWriter(domainDir + "pb" + problemNumber + ".pddl", "UTF-8");
 			writer.print(s);
@@ -44,7 +45,7 @@ public class GenerateProblems {
 		}
 	}
 
-	private static String generateDrinkAndDriveProblem(String domainName, int problemNumber, int numCities, List<PredicateExclusive> predicateExclusives, boolean skipFirstLast, Grid grid) {
+	private static String generateDrinkAndDriveProblem(String domainName, int problemNumber, int numCities, List<PredicateExclusive> predicateExclusives, boolean skipFirstLast, Grid grid, String constraints) {
 		DirectedGraph<String, DefaultEdge> g = getRandomConnectedGraph(numCities, grid);
 
 		String tabs = "";
@@ -142,6 +143,15 @@ public class GenerateProblems {
 				"\t\t)\n" +
 				"\t)\n";
 
+		if(constraints != null) {
+			// Constraints
+			s += tabs + "(:constraints" + LS;
+			s += tabs + tabs + "(and" + LS;
+			s += tabs + tabs + tabs + constraints + LS;
+			s += tabs + tabs + ")" + LS;
+			s += tabs + ")" + LS;
+		}
+
 		s += ")";
 		return s;
 	}
@@ -187,7 +197,7 @@ public class GenerateProblems {
 				for (int j = 0; j < numNodes; j++) {
 					if (i != j) {
 						if (random.nextDouble() > (((double) Math.abs(i - j)) / numNodes)) {
-							if (random.nextDouble() < 0.2) {
+							if (random.nextDouble() < PROBABILITY_OF_ADDING_RANDOM_EDGE) {
 								g.addEdge("loc" + (i + 1), "loc" + (j + 1));
 							}
 						}

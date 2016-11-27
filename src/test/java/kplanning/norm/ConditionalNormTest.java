@@ -32,18 +32,18 @@ public class ConditionalNormTest {
 		ConditionalNorm simpleNorm = getSimpleNorm1();
 
 		// True
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara")));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a").getFacts()));
 
 		// False
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d")));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d").getFacts()));
 	}
 
 	@Test
@@ -51,18 +51,18 @@ public class ConditionalNormTest {
 		ConditionalNorm simpleNorm = getSimpleNorm2();
 
 		// True
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a")));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a").getFacts()));
 
 		// False
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d")));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d").getFacts()));
 	}
 
 	@Test
@@ -70,23 +70,23 @@ public class ConditionalNormTest {
 		ConditionalNorm simpleNorm = getComplexNorm1();
 
 		// True
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at a")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at b")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d, at c")));
-		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at a, inbar bara")));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at a").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at b").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at d, at c").getFacts()));
+		assertTrue(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk, at a, inbar bara").getFacts()));
 
 		// False
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a")));
-		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk")));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at b").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at c").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at d, at c").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, at a, inbar bara").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("drunk, inbar bara, not at a").getFacts()));
+		assertFalse(simpleNorm.isPossibleViolationState(adapter.getJavaffParser().getStripsState("not drunk").getFacts()));
 	}
 
 	/**

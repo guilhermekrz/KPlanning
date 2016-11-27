@@ -57,7 +57,7 @@ public class GenerateNorms {
 				GroundConditionalNorm groundConditionalNorm = normList.get(j);
 				lines.add("ground;n" + (j+1) + ";"
 						+ groundConditionalNorm.getNormModality() + ";"
-						+ groundConditionalNorm.getTrueFacts().toString().replace("[", "").replace("]", "") + ";"
+						+ groundConditionalNorm.getCompoundLiteral().getFacts().toString().replace("[", "").replace("]", "") + ";"
 						+ groundConditionalNorm.getAction() + ";"
 						+ (int) ((random.nextDouble() + 0.2) * groundConditionalNorm.getCost())
 				);

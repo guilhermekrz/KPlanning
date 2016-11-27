@@ -2,11 +2,10 @@ package kplanning.norm;
 
 import fr.uga.pddl4j.parser.Connective;
 import fr.uga.pddl4j.parser.Exp;
+import jason.stdlib.ground;
 import javaff.data.Action;
 import javaff.data.CompoundLiteral;
-import javaff.data.Fact;
 import javaff.data.strips.And;
-import javaff.data.strips.Not;
 import javaff.data.strips.Predicate;
 import kplanning.DomainProblemAdapter;
 import kplanning.exception.NotFoundActionException;
@@ -65,38 +64,28 @@ public class NormAdapter {
 					while ((line = br.readLine()) != null) {
 						if(!line.startsWith("//")) {
 							String[] split = line.trim().split(";");
-							if (split.length == 6) {
-								String ground = split[0];
-								String name = split[1];
-								String modality = split[2];
-								String context = split[3]; // TODO: separate by comma
-								String action = split[4];
-								String cost = split[5];
+							if (split.length > 0) {
+								String type = split[0];
+								if (type.equals("ground") || type.equals("unground")) {
+									String name = split[1];
+									String modality = split[2];
+									String context = split[3]; // TODO: separate by comma, allow variables and ground
+									String action = split[4];
+									String cost = split[5];
 
-								NormModality normModality = NormModality.valueOf(modality);
-								if (!ground.startsWith("//")) {
+									NormModality normModality = NormModality.valueOf(modality);
 									try {
 										int intCost = Integer.valueOf(cost);
 
-										if (ground.equals("unground")) {
+										if (type.equals("unground")) {
 											CompoundLiteral compoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(context))));
 											ConditionalNorm conditionalNorm = new ConditionalNorm(adapter, name, normModality, intCost, compoundLiteral, adapter.getJavaffParser().getUngroundAction(action));
 											conditionalNorms.add(conditionalNorm);
 											this.groundConditionalNorms.addAll(conditionalNorm.ground());
 										} else {
-											Set<Fact> trueFacts = adapter.getJavaffParser().getTrueFacts(context);
-
+											CompoundLiteral compoundLiteral = new And(Collections.singleton(adapter.getJavaffParser().getFact(context)));
 											Action thisAction = adapter.getJavaffParser().getAction(action);
-											Set<Fact> preconditions = thisAction.getPreconditions();
-											for (Fact pre : preconditions) {
-												if (pre instanceof Not) {
-													trueFacts.add(((Not) pre).getLiteral());
-												} else {
-													trueFacts.add(pre);
-												}
-											}
-
-											GroundConditionalNorm groundConditionalNorm = new GroundConditionalNorm(adapter, name, normModality, trueFacts, intCost, thisAction);
+											GroundConditionalNorm groundConditionalNorm = new GroundConditionalNorm(adapter, name, normModality, compoundLiteral, intCost, thisAction);
 											this.groundConditionalNorms.add(groundConditionalNorm);
 										}
 									} catch (IllegalArgumentException e) {
@@ -106,9 +95,9 @@ public class NormAdapter {
 									} catch (NotFoundActionException e) {
 										System.out.println("Not found specified action: " + action);
 									}
+								} else {
+									System.out.println("Error! Each line should have six elements: " + line);
 								}
-							} else {
-								System.out.println("Error! Each line should have six elements: " + line);
 							}
 						}
 					}

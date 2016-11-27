@@ -4,6 +4,7 @@ import javaff.data.Action;
 import javaff.data.Fact;
 import kplanning.DomainProblemAdapter;
 import kplanning.norm.ConditionalNorm;
+import kplanning.norm.GroundConditionalNorm;
 import kplanning.norm.LtlNorm;
 import kplanning.norm.Norm;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ public class NormPlanningGraph extends PlanningGraph {
 		boolean hasLevelledOff = super.hasLevelledOff();
 		if(!hasLevelledOff && !returnNormCompliantPlans) {
 			if(getCurrentLevel() > 200) {
+				// TODO: I think we need to revisit the hasLevelledOff function
 				Logger.debug("Could not find a solution - Reached maximum level 200");
 				hasLevelledOff = true;
 			}
@@ -39,6 +41,7 @@ public class NormPlanningGraph extends PlanningGraph {
 		this.returnNormCompliantPlans = returnNormCompliantPlans;
 	}
 
+	// TODO: what if in the norm context there is a fact that does not appear in the current subgoals????
 	private boolean isViolation(Set<Action> possibleActions, Collection<Fact> subgoalsFactSet) {
 		for(Norm norm : norms) {
 			if(norm instanceof ConditionalNorm) {
@@ -50,11 +53,20 @@ public class NormPlanningGraph extends PlanningGraph {
 						}
 					}
 				}
+			} else if(norm instanceof GroundConditionalNorm) {
+				GroundConditionalNorm groundConditionalNorm = (GroundConditionalNorm) norm;
+				for (Action possibleAction : possibleActions) {
+					if (groundConditionalNorm.isPossibleViolationAction(possibleAction)) {
+						if (groundConditionalNorm.isPossibleViolationState(subgoalsFactSet)) {
+							return true;
+						}
+					}
+				}
 			} else if(norm instanceof LtlNorm) {
 				// TODO: implement
 				throw new NotImplementedException();
 			} else {
-				throw new IllegalStateException("Only supported ConditionalNorms or LtlNorms: " + norm);
+				throw new IllegalStateException("Only supported ConditionalNorms or GroundConditionalNorm or LtlNorms: " + norm);
 			}
 		}
 		return false;
@@ -74,11 +86,23 @@ public class NormPlanningGraph extends PlanningGraph {
 						return true;
 					}
 				}
+			} else if(norm instanceof GroundConditionalNorm) {
+				GroundConditionalNorm groundConditionalNorm = (GroundConditionalNorm) norm;
+				if (groundConditionalNorm.isPossibleViolationAction(possibleAction)) {
+					Set<Fact> newSubgoalFactsSet = new HashSet<>();
+					for (Action action : actionSet) {
+						newSubgoalFactsSet.addAll(action.getPreconditions());
+					}
+
+					if (groundConditionalNorm.isPossibleViolationState(newSubgoalFactsSet)) {
+						return true;
+					}
+				}
 			} else if(norm instanceof LtlNorm) {
 				// TODO: implement
 				throw new NotImplementedException();
 			} else {
-				throw new IllegalStateException("Only supported ConditionalNorms or LtlNorms: " + norm);
+				throw new IllegalStateException("Only supported ConditionalNorms or GroundConditionalNorm or LtlNorms: " + norm);
 			}
 		}
 		return false;

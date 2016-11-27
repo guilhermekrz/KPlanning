@@ -11,7 +11,7 @@ public class SolutionQualityTest {
 
 	@Test
 	public void testPlanBlocksworld0to6() {
-		for(int i=0;i<=6;i++) {
+		for(int i=1;i<=6;i++) {
 			assertNumberOfSteps("blocksworld", i);
 		}
 	}
