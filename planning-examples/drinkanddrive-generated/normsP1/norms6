@@ -1,0 +1,6 @@
+ground;n1;PROHIBITION;drunk;move loc2 loc1;8
+ground;n2;PROHIBITION;drunk;move loc4 loc3;6
+ground;n3;PROHIBITION;drunk;move loc1 loc6;10
+ground;n4;PROHIBITION;drunk;move loc6 loc5;6
+ground;n5;PROHIBITION;drunk;move loc1 loc4;9
+ground;n6;PROHIBITION;drunk;move loc3 loc2;2

@@ -1,4 +1,4 @@
-ground;n1;PROHIBITION;drunk, at loc5;move loc5 loc4;5
-ground;n2;PROHIBITION;at loc1, drunk;move loc1 loc4;4
-ground;n3;PROHIBITION;at loc4, drunk;move loc4 loc1;10
-ground;n4;PROHIBITION;at loc2, drunk;move loc2 loc6;10
+ground;n1;PROHIBITION;drunk;move loc4 loc3;4
+ground;n2;PROHIBITION;drunk;move loc1 loc6;3
+ground;n3;PROHIBITION;drunk;move loc1 loc5;2
+ground;n4;PROHIBITION;drunk;move loc2 loc3;5

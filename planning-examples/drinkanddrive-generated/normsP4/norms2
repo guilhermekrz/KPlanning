@@ -1,2 +1,2 @@
-ground;n1;PROHIBITION;at loc7, drunk;move loc7 loc4;9
-ground;n2;PROHIBITION;drunk, at loc5;move loc5 loc3;5
+ground;n1;PROHIBITION;drunk;move loc9 loc8;2
+ground;n2;PROHIBITION;drunk;move loc6 loc9;11

@@ -1,0 +1,8 @@
+ground;n1;OBLIGATION;on a d;stack e c;18
+ground;n2;OBLIGATION;on b a;stack e d;33
+ground;n3;OBLIGATION;on b c;stack d d;20
+ground;n4;OBLIGATION;on d f;stack a a;12
+ground;n5;OBLIGATION;on d f;stack c f;14
+ground;n6;OBLIGATION;on b e;stack a a;35
+ground;n7;OBLIGATION;on c d;stack b e;35
+ground;n8;OBLIGATION;on f d;stack d e;34

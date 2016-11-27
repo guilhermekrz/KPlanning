@@ -1,0 +1,15 @@
+#!/usr/bin/env gnuplot
+# How to use? gnuplot -e "filename='blocksworld/conditionalCompliant'" -e "outputfilename='blocksworldConditionalCompliant.pdf'"  plotScript
+
+set terminal pdf font "Helvetica,10" enhanced
+set output outputfilename
+
+set xlabel 'Problem'
+set ylabel 'Time (ms)'
+
+set key inside top left
+
+plot filename using 3 title "Naive Graphplan" with linespoints smooth csplines,\
+        filename using 5 title "Graphplan" with linespoints smooth csplines,\
+        filename using 7 title "Forward 1" with linespoints smooth csplines,\
+        filename using 9 title "Forward 2" with linespoints smooth csplines
