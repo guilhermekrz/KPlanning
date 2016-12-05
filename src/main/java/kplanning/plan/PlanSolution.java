@@ -50,12 +50,9 @@ public class PlanSolution {
 		this(adapter, new HashSet<>(Collections.singletonList(plan)));
 	}
 
-	private static PlanSolution noSolutionPlanSolution;
 	public static PlanSolution getNoSolutionPlanSolution(DomainProblemAdapter adapter) {
-		if(noSolutionPlanSolution == null) {
-			noSolutionPlanSolution = new PlanSolution(adapter, new HashSet<>());
-			noSolutionPlanSolution.planSolutionType = PlanSolutionType.NO_SOLUTION;
-		}
+		PlanSolution noSolutionPlanSolution = new PlanSolution(adapter, new HashSet<>());
+		noSolutionPlanSolution.planSolutionType = PlanSolutionType.NO_SOLUTION;
 		return noSolutionPlanSolution;
 	}
 

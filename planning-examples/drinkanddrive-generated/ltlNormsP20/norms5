@@ -1,0 +1,5 @@
+ltlGround;n1;OBLIGATION;AT_MOST_ONCE;-1;at loc24;
+ltlGround;n2;OBLIGATION;AT_MOST_ONCE;-1;at loc54;
+ltlGround;n3;OBLIGATION;AT_MOST_ONCE;-1;at loc45;
+ltlGround;n4;OBLIGATION;AT_MOST_ONCE;-1;at loc6;
+ltlGround;n5;OBLIGATION;SOMETIME;-1;drunk;

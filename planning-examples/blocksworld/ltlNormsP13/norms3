@@ -1,0 +1,3 @@
+ltlGround;n1;OBLIGATION;SOMETIME_AFTER;-1;ontable h;ontable l
+ltlGround;n2;OBLIGATION;SOMETIME_AFTER;-1;ontable b;ontable l
+ltlGround;n3;OBLIGATION;SOMETIME_AFTER;-1;ontable h;ontable a

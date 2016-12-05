@@ -1,7 +1,7 @@
 package kplanning.generator;
 
 import kplanning.DomainProblemAdapter;
-import kplanning.norm.GroundConditionalNorm;
+import kplanning.norm.GroundNorm;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +20,11 @@ public class GenerateNorms {
 	private DomainProblemAdapter adapter;
 	private String normsDir;
 	private int maxNumberOfGeneratedNorms;
+	private boolean generateConditionalNorms;
 
-	public GenerateNorms(String domain, String problem, String normsFile, String normsDir, int maxNumberOfGeneratedNorms) {
+	public GenerateNorms(String domain, String problem, String normsFile, String normsDir, int maxNumberOfGeneratedNorms, boolean generateConditionalNorms) {
 		this.maxNumberOfGeneratedNorms = maxNumberOfGeneratedNorms;
+		this.generateConditionalNorms = generateConditionalNorms;
 		adapter = DomainProblemAdapter.newInstance(domain, problem, normsFile);
 		this.normsDir = normsDir;
 		File normsDirFile = new File(this.normsDir);
@@ -31,12 +33,22 @@ public class GenerateNorms {
 	}
 
 	public int getNumOfGeneratedNorms() {
-		int size = adapter.getNormAdapter().getGroundConditionalNorms().size();
+		int size;
+		if(generateConditionalNorms) {
+			size = adapter.getNormAdapter().getGroundConditionalNorms().size();
+		} else {
+			size = adapter.getNormAdapter().getGroundLtlNorms().size();
+		}
 		return (size < maxNumberOfGeneratedNorms)? size : maxNumberOfGeneratedNorms;
 	}
 
 	public void generateNormsAndWriteToFiles() {
-		List<GroundConditionalNorm> normList = new ArrayList<>(adapter.getNormAdapter().getGroundConditionalNorms());
+		List<GroundNorm> normList;
+		if(generateConditionalNorms) {
+			normList = new ArrayList<>(adapter.getNormAdapter().getGroundConditionalNorms());
+		} else {
+			normList = new ArrayList<>(adapter.getNormAdapter().getGroundLtlNorms());
+		}
 		if(INCREMENT_NORMS) {
 			// If INCREMENT_NORMS, only shuffle once
 			Collections.shuffle(normList);
@@ -54,13 +66,8 @@ public class GenerateNorms {
 			}
 
 			for(int j=0;j<i;j++) {
-				GroundConditionalNorm groundConditionalNorm = normList.get(j);
-				lines.add("ground;n" + (j+1) + ";"
-						+ groundConditionalNorm.getNormModality() + ";"
-						+ groundConditionalNorm.getCompoundLiteral().getFacts().toString().replace("[", "").replace("]", "") + ";"
-						+ groundConditionalNorm.getAction() + ";"
-						+ (int) ((random.nextDouble() + 0.2) * groundConditionalNorm.getCost())
-				);
+				GroundNorm groundNorm = normList.get(j);
+				lines.add(groundNorm.toFile("n" + (j+1), (int) ((random.nextDouble() + 0.2) * groundNorm.getCost())));
 			}
 
 			try {

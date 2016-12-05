@@ -1,0 +1,4 @@
+ground;n1;OBLIGATION;on i c;stack a m;20
+ground;n2;OBLIGATION;on i i;stack f c;18
+ground;n3;PROHIBITION;ontable h;pickup i;47
+ground;n4;OBLIGATION;on l l;stack b e;10

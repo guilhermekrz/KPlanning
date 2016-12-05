@@ -15,6 +15,10 @@ public class TimeStatistic extends Statistic {
 		this.finalValue = System.currentTimeMillis();
 	}
 
+	public double getCurrentDiff() {
+		return System.currentTimeMillis() - this.value;
+	}
+
 	public double getDiff() {
 		if(this.value != -1 && this.finalValue != -1) {
 			return this.finalValue - this.value;

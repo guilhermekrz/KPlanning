@@ -1,0 +1,15 @@
+ltlGround;n1;OBLIGATION;SOMETIME_AFTER;-1;ontable f;ontable b
+ltlGround;n2;OBLIGATION;SOMETIME_AFTER;-1;ontable e;ontable a
+ltlGround;n3;OBLIGATION;ALWAYS_WITHIN;4;holding f;holding b
+ltlGround;n4;OBLIGATION;ALWAYS_WITHIN;4;holding d;holding d
+ltlGround;n5;OBLIGATION;SOMETIME_AFTER;-1;ontable g;ontable e
+ltlGround;n6;OBLIGATION;ALWAYS_WITHIN;4;holding d;holding b
+ltlGround;n7;OBLIGATION;SOMETIME_AFTER;-1;ontable e;ontable h
+ltlGround;n8;OBLIGATION;SOMETIME_AFTER;-1;ontable g;holding c
+ltlGround;n9;OBLIGATION;AT_MOST_ONCE;-1;holding c;
+ltlGround;n10;OBLIGATION;SOMETIME_AFTER;-1;ontable f;holding g
+ltlGround;n11;OBLIGATION;SOMETIME_AFTER;-1;ontable e;holding f
+ltlGround;n12;OBLIGATION;SOMETIME_AFTER;-1;ontable i;ontable b
+ltlGround;n13;OBLIGATION;SOMETIME_AFTER;-1;ontable a;ontable e
+ltlGround;n14;OBLIGATION;SOMETIME_AFTER;-1;ontable f;holding f
+ltlGround;n15;OBLIGATION;ALWAYS_WITHIN;4;holding b;holding b

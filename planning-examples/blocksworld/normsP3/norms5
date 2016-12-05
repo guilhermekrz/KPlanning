@@ -1,5 +1,0 @@
-ground;n1;PROHIBITION;ontable c;pickup a;27
-ground;n2;PROHIBITION;clear c;stack b a;28
-ground;n3;PROHIBITION;clear a;stack c a;43
-ground;n4;OBLIGATION;on c c;stack c b;34
-ground;n5;PROHIBITION;clear b;stack c a;27

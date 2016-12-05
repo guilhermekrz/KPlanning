@@ -23,17 +23,11 @@ public class NaiveGraphplanNormPlanner extends NormPlanner {
 		throw new NotImplementedException();
 	}
 
-	@Override
-	public @NotNull PlanSolution internalPlanNormCompliant(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, true);
-	}
-
-	@Override
-	public @NotNull PlanSolution internalPlanNormViolation(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, false);
-	}
-
-	private @NotNull PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
+	public @NotNull PlanSolution internalPlanNorm(NormPlannerType normPlannerType, boolean foundAllSolutions, int levels) {
+		if(normPlannerType.equals(NormPlannerType.NORM_MINIMUM_COST)) {
+			throw new NotImplementedException();
+		}
+		boolean returnNormCompliant = normPlannerType.equals(NormPlannerType.NORM_COMPLIANT);
 		while(true) {
 			if(planningGraph.isGoalPossible()) {
 				// We need to try to extract allPossiblePlans, even if we want just one plan.

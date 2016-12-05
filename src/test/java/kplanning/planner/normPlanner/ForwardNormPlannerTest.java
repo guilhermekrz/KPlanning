@@ -11,16 +11,15 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-// TODO: add tests with all connectives
-// TODO: add large problems
+// TODO: Add more tests
 public class ForwardNormPlannerTest {
 
 	private void testWithAndWithoutNormKeeper(DomainProblemAdapter adapter, Plan plan1, Plan plan2, Set<? extends Norm> norms) {
 		ForwardNormPlanner planner1 = new ForwardNormPlanner(adapter, false, norms);
 		ForwardNormPlanner planner2 = new ForwardNormPlanner(adapter, true, norms);
 
-		PlanSolution planSolution11 = planner1.planNormCompliant();
-		PlanSolution planSolution12 = planner2.planNormCompliant();
+		PlanSolution planSolution11 = planner1.planNorm(NormPlanner.NormPlannerType.NORM_COMPLIANT);
+		PlanSolution planSolution12 = planner2.planNorm(NormPlanner.NormPlannerType.NORM_COMPLIANT);
 		if(plan1 == null) {
 			assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution11);
 			assertEquals(PlanSolution.getNoSolutionPlanSolution(adapter), planSolution12);
@@ -29,8 +28,8 @@ public class ForwardNormPlannerTest {
 			assertEquals(plan1, planSolution12.getPlan());
 		}
 
-		PlanSolution planSolution21 = planner1.planNormViolation();
-		PlanSolution planSolution22 = planner2.planNormViolation();
+		PlanSolution planSolution21 = planner1.planNorm(NormPlanner.NormPlannerType.NORM_VIOLATION);
+		PlanSolution planSolution22 = planner2.planNorm(NormPlanner.NormPlannerType.NORM_VIOLATION);
 		assertEquals(plan2, planSolution21.getPlan());
 		assertEquals(plan2, planSolution22.getPlan());
 	}

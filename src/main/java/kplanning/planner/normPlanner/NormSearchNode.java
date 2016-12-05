@@ -9,10 +9,15 @@ import java.util.List;
 import java.util.Set;
 
 abstract class NormSearchNode {
+	private static final int DEFAULT_ACTION_COST = 1;
+
 	NormSearchNode previousNode;
 	private Action previousAction;
 	STRIPSState state;
 	private int currentCost;
+	private int actionCost;
+	int totalNormCost, absoluteNormCost, currentNormCost;
+	private boolean hasCurrentCostInTotalCost;
 	Set<? extends Norm> norms;
 
 	NormSearchNode(NormSearchNode previousNode, Action previousAction, STRIPSState state, Set<? extends Norm> norms) {
@@ -20,11 +25,12 @@ abstract class NormSearchNode {
 		this.previousAction = previousAction;
 		this.state = state;
 		if(this.previousNode == null) {
-			this.currentCost = 0;
+			this.actionCost = 1;
 		} else {
-			this.currentCost = this.previousNode.getCurrentCost() + 1; // Actions always have cost 1
+			this.actionCost = this.previousNode.getActionCost() + DEFAULT_ACTION_COST;
 		}
 		this.norms = norms;
+		this.hasCurrentCostInTotalCost = false;
 	}
 
 	private NormSearchNode getPreviousNode() {
@@ -39,8 +45,36 @@ abstract class NormSearchNode {
 		return previousAction;
 	}
 
+	public int getActionCost() {
+		return actionCost;
+	}
+
+	public int getTotalNormCost() {
+		return totalNormCost;
+	}
+
+	public int getAbsoluteNormCost() {
+		return absoluteNormCost;
+	}
+
+	public int getCurrentNormCost() {
+		return currentNormCost;
+	}
+
+	public void setCurrentCost(int currentCost) {
+		this.currentCost = currentCost;
+	}
+
 	int getCurrentCost() {
 		return currentCost;
+	}
+
+	public boolean hasCurrentCostInTotalCost() {
+		return hasCurrentCostInTotalCost;
+	}
+
+	public void setHasCurrentCostInTotalCost(boolean hasCurrentCostInTotalCost) {
+		this.hasCurrentCostInTotalCost = hasCurrentCostInTotalCost;
 	}
 
 	// There is no way that this search will return a non-violation plan
@@ -69,8 +103,22 @@ abstract class NormSearchNode {
 		return states;
 	}
 
+	public boolean equals(Object obj) {
+		if(obj instanceof NormSearchNode) {
+			NormSearchNode s = (NormSearchNode)obj;
+			return s.state.equals(s.getState());
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		return state.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "[" + state.toString() + "," + currentCost + "]";
 	}
 }

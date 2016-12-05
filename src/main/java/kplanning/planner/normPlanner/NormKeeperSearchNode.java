@@ -12,7 +12,6 @@ import java.util.Set;
 public class NormKeeperSearchNode extends NormSearchNode {
 
 	private NormKeeper normKeeper;
-	private boolean normKeeperUpdated = false;
 
 	NormKeeperSearchNode(STRIPSState state, Set<? extends Norm> norms) {
 		this(null, null, state, norms);
@@ -22,39 +21,33 @@ public class NormKeeperSearchNode extends NormSearchNode {
 		super(previousNode, previousAction, state, norms);
 		if(this.previousNode == null) {
 			this.normKeeper = new NormKeeper();
-			checkAndUpdateNormKeeper();
 		} else {
 			this.normKeeper = ((NormKeeperSearchNode)this.previousNode).getCloneNormKeeper();
 		}
+		normKeeper.update(state);
+		this.totalNormCost = normKeeper.getTotalNormCost();
+		this.absoluteNormCost = normKeeper.getAbsoluteNormCost();
+		this.currentNormCost = normKeeper.getCurrentNormCost();
 	}
 
 	private NormKeeper getCloneNormKeeper() {
 		return normKeeper.getCopy();
 	}
 
-	private void checkAndUpdateNormKeeper() {
-		if(!normKeeperUpdated) {
-			normKeeper.update(state);
-			normKeeperUpdated = true;
-		}
-	}
-
 	@Override
 	public boolean isAbsoluteViolation() {
-		checkAndUpdateNormKeeper();
 		return normKeeper.isAbsoluteViolation();
 	}
 
 	@Override
 	public boolean isCurrentlyViolation() {
-		checkAndUpdateNormKeeper();
 		return normKeeper.isCurrentlyViolation();
 	}
 
 	private class NormKeeper {
 		Set<GroundLtlNorm> actualGroundLtlNorms;
-		Set<GroundLtlNorm> curretlyiolationNorms;
-		Set<GroundLtlNorm> abolsuteViolationNorms;
+		Set<GroundLtlNorm> currentlyViolationNorms;
+		Set<GroundLtlNorm> absoluteViolationNorms;
 
 		NormKeeper() {
 			this(true);
@@ -63,8 +56,8 @@ public class NormKeeperSearchNode extends NormSearchNode {
 		private NormKeeper(boolean init) {
 			if(init) {
 				actualGroundLtlNorms = new HashSet<>();
-				curretlyiolationNorms = new HashSet<>();
-				abolsuteViolationNorms = new HashSet<>();
+				currentlyViolationNorms = new HashSet<>();
+				absoluteViolationNorms = new HashSet<>();
 
 				for(Norm norm : norms) {
 					if(norm instanceof GroundLtlNorm) {
@@ -73,7 +66,7 @@ public class NormKeeperSearchNode extends NormSearchNode {
 								|| groundLtlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
 							actualGroundLtlNorms.add(groundLtlNorm);
 						} else if(groundLtlNorm.getConnective().equals(Connective.SOMETIME)) {
-							curretlyiolationNorms.add(groundLtlNorm);
+							currentlyViolationNorms.add(groundLtlNorm);
 						}
 					} else {
 						throw new IllegalStateException("NormKeeperSearchNode only deals with LTLNorms");
@@ -86,14 +79,14 @@ public class NormKeeperSearchNode extends NormSearchNode {
 			// Add to pending violation
 			for(GroundLtlNorm groundLtlNorm : actualGroundLtlNorms) {
 				if(groundLtlNorm.getConnective().equals(Connective.ALWAYS)) {
-					curretlyiolationNorms.add(groundLtlNorm);
+					currentlyViolationNorms.add(groundLtlNorm);
 				}
 			}
 
 			// Update norms
 			Set<GroundLtlNorm> newAbsoluteViolations = new HashSet<>();
 			Set<GroundLtlNorm> newNotViolations = new HashSet<>();
-			for(GroundLtlNorm groundLtlNorm : curretlyiolationNorms) {
+			for(GroundLtlNorm groundLtlNorm : currentlyViolationNorms) {
 				if(groundLtlNorm.getConnective().equals(Connective.ALWAYS)) {
 					if(groundLtlNorm.isOTrue(newState)) {
 						newNotViolations.add(groundLtlNorm);
@@ -111,39 +104,74 @@ public class NormKeeperSearchNode extends NormSearchNode {
 				}
 			}
 
-			curretlyiolationNorms.removeAll(newAbsoluteViolations);
-			curretlyiolationNorms.removeAll(newNotViolations);
-			abolsuteViolationNorms.addAll(newAbsoluteViolations);
+			currentlyViolationNorms.removeAll(newAbsoluteViolations);
+			currentlyViolationNorms.removeAll(newNotViolations);
+			absoluteViolationNorms.addAll(newAbsoluteViolations);
 
 			// Add to currently violation
 			for(GroundLtlNorm groundLtlNorm : actualGroundLtlNorms) {
 				if(groundLtlNorm.getConnective().equals(Connective.SOMETIME_AFTER)) {
 					if(groundLtlNorm.isOTrue(newState)) {
-						curretlyiolationNorms.add(groundLtlNorm);
+						currentlyViolationNorms.add(groundLtlNorm);
 					}
 				}
 			}
 		}
 
 		boolean isCurrentlyViolation() {
-			return isAbsoluteViolation() || !curretlyiolationNorms.isEmpty();
+			return isAbsoluteViolation() || !currentlyViolationNorms.isEmpty();
 		}
 
 		boolean isAbsoluteViolation() {
-			return !abolsuteViolationNorms.isEmpty();
+			return !absoluteViolationNorms.isEmpty();
+		}
+
+		int totalNormCost, absoluteNormCost, currentNormCost;
+
+		public int getTotalNormCost() {
+			checkAndPopulateCost();
+			return totalNormCost;
+		}
+
+		public int getAbsoluteNormCost() {
+			checkAndPopulateCost();
+			return absoluteNormCost;
+		}
+
+		public int getCurrentNormCost() {
+			checkAndPopulateCost();
+			return currentNormCost;
+		}
+
+		private void checkAndPopulateCost() {
+			if(totalNormCost == -1 || absoluteNormCost == -1 || currentNormCost == -1) {
+				totalNormCost = 0;
+				absoluteNormCost = 0;
+				currentNormCost = 0;
+
+				for(GroundLtlNorm groundLtlNorm : currentlyViolationNorms) {
+					totalNormCost += groundLtlNorm.getCost();
+					currentNormCost += groundLtlNorm.getCost();
+				}
+				for(GroundLtlNorm groundLtlNorm : absoluteViolationNorms) {
+					totalNormCost += groundLtlNorm.getCost();
+					currentNormCost += groundLtlNorm.getCost();
+					absoluteNormCost += groundLtlNorm.getCost();
+				}
+			}
 		}
 
 		protected NormKeeper getCopy() {
 			NormKeeper normKeeper = new NormKeeper(false);
 			normKeeper.actualGroundLtlNorms = new HashSet<>(this.actualGroundLtlNorms);
-			normKeeper.abolsuteViolationNorms = new HashSet<>(this.abolsuteViolationNorms);
-			normKeeper.curretlyiolationNorms = new HashSet<>(this.curretlyiolationNorms);
+			normKeeper.absoluteViolationNorms = new HashSet<>(this.absoluteViolationNorms);
+			normKeeper.currentlyViolationNorms = new HashSet<>(this.currentlyViolationNorms);
 			return normKeeper;
 		}
 
 		@Override
 		public String toString() {
-			return "Norm Keeper:\n\tCurrently violation norms:" + curretlyiolationNorms + "\n\tAbsolute violation norms:" + abolsuteViolationNorms;
+			return "Norm Keeper:\n\tCurrently violation norms:" + currentlyViolationNorms + "\n\tAbsolute violation norms:" + absoluteViolationNorms;
 		}
 	}
 }

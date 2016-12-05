@@ -24,12 +24,12 @@ public class NormPlanningGraph extends PlanningGraph {
 		this.norms = norms;
 	}
 
+	// TODO: Revisit this levelled off function
 	@Override
 	public boolean hasLevelledOff() {
 		boolean hasLevelledOff = super.hasLevelledOff();
 		if(!hasLevelledOff && !returnNormCompliantPlans) {
 			if(getCurrentLevel() > 200) {
-				// TODO: I think we need to revisit the hasLevelledOff function
 				Logger.debug("Could not find a solution - Reached maximum level 200");
 				hasLevelledOff = true;
 			}
@@ -41,7 +41,8 @@ public class NormPlanningGraph extends PlanningGraph {
 		this.returnNormCompliantPlans = returnNormCompliantPlans;
 	}
 
-	// TODO: what if in the norm context there is a fact that does not appear in the current subgoals????
+	// Assumption: We know the truth value of the propositions of the norm
+	// TODO: try to drop this assumption
 	private boolean isViolation(Set<Action> possibleActions, Collection<Fact> subgoalsFactSet) {
 		for(Norm norm : norms) {
 			if(norm instanceof ConditionalNorm) {

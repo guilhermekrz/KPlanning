@@ -9,7 +9,7 @@ import kplanning.DomainProblemAdapter;
 import java.util.Collection;
 import java.util.List;
 
-public class GroundConditionalNorm extends Norm {
+public class GroundConditionalNorm extends Norm implements GroundNorm {
 	private DomainProblemAdapter adapter;
 	private String name;
 	private NormModality normModality;
@@ -97,5 +97,14 @@ public class GroundConditionalNorm extends Norm {
 		h = 37 * h + action.hashCode();
 		h = 37 * h + adapter.hashCode();
 		return h;
+	}
+
+	@Override
+	public String toFile(String name, int cost) {
+		return "ground;" + name + ";"
+				+ getNormModality() + ";"
+				+ getCompoundLiteral().getFacts().toString().replace("[", "").replace("]", "") + ";"
+				+ getAction() + ";"
+				+ cost;
 	}
 }

@@ -24,6 +24,7 @@ public class NormAdapter {
 	private DomainProblemAdapter adapter;
 	private Set<ConditionalNorm> conditionalNorms;
 	private Set<GroundConditionalNorm> groundConditionalNorms;
+	private Set<LtlNorm> ltlNorms;
 	private Set<GroundLtlNorm> groundLtlNorms;
 
 	/**
@@ -36,6 +37,10 @@ public class NormAdapter {
 
 	private NormAdapter(DomainProblemAdapter adapter) {
 		this.adapter = adapter;
+		this.conditionalNorms = new HashSet<>();
+		this.groundConditionalNorms = new HashSet<>();
+		this.ltlNorms = new HashSet<>();
+		this.groundLtlNorms = new HashSet<>();
 		populateConditionalNorms();
 		populateLtlNorms();
 	}
@@ -53,8 +58,6 @@ public class NormAdapter {
 	}
 
 	private void populateConditionalNorms() {
-		conditionalNorms = new HashSet<>();
-		this.groundConditionalNorms = new HashSet<>();
 		if(adapter.getConditionalNormFile() != null) {
 			File file = new File(adapter.getConditionalNormFile());
 			if (file.exists()) {
@@ -94,8 +97,44 @@ public class NormAdapter {
 									} catch (NotFoundActionException e) {
 										System.out.println("Not found specified action: " + action);
 									}
-								} else {
-									System.out.println("Error! Each line should have six elements: " + line);
+								} else if(type.equals("ltlUnground") || type.equals("ltlGround")) {
+									String name = split[1];
+									String modality = split[2];
+									String connective = split[3];
+									String t = split[4];
+									String o = split[5]; // TODO: separate by comma, allow variables and ground, and negative! add tests
+									NormModality normModality = NormModality.valueOf(modality);
+									Connective normConnective = Connective.valueOf(connective);
+									CompoundLiteral vCompoundLiteral;
+
+									if(type.equals("ltlUnground")) {
+										if (normConnective.equals(Connective.ALWAYS) || normConnective.equals(Connective.SOMETIME) || normConnective.equals(Connective.AT_END) || normConnective.equals(Connective.AT_MOST_ONCE)) {
+											vCompoundLiteral = null;
+										} else {
+											String v = split[6]; // TODO: separate by comma, allow variables and ground, and negative! add tests
+											vCompoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(v))));
+										}
+										int tInt = Integer.valueOf(t);
+										CompoundLiteral oCompoundLiteral = new And(Collections.singleton(new Predicate(adapter.getJavaffParser().getPredicateSymbol(o))));
+
+										LtlNorm ltlNorm = new LtlNorm(adapter, normModality, name, normConnective, tInt, oCompoundLiteral, vCompoundLiteral);
+										ltlNorms.add(ltlNorm);
+										this.groundLtlNorms.addAll(ltlNorm.ground());
+									} else {
+										if (normConnective.equals(Connective.ALWAYS) || normConnective.equals(Connective.SOMETIME) || normConnective.equals(Connective.AT_END) || normConnective.equals(Connective.AT_MOST_ONCE)) {
+											vCompoundLiteral = null;
+										} else {
+											String v = split[6]; // TODO: separate by comma, allow variables and ground, and negative! add tests
+											vCompoundLiteral = new And(Collections.singleton(adapter.getJavaffParser().getFact(v)));
+										}
+										int tInt = Integer.valueOf(t);
+										CompoundLiteral oCompoundLiteral = new And(Collections.singleton(adapter.getJavaffParser().getFact(o)));
+
+										GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, normModality, name, normConnective, tInt, oCompoundLiteral, vCompoundLiteral);
+										this.groundLtlNorms.add(groundLtlNorm);
+									}
+								}  else {
+									System.out.println("Error! Line should start with ground, unground, ltlUnground or ltlGround: " + line);
 								}
 							}
 						}
@@ -111,12 +150,15 @@ public class NormAdapter {
 	 * LTL norms
 	 */
 
+	public Set<LtlNorm> getLtlNorms() {
+		return ltlNorms;
+	}
+
 	public Set<GroundLtlNorm> getGroundLtlNorms() {
 		return groundLtlNorms;
 	}
 
 	private void populateLtlNorms() {
-		groundLtlNorms = new HashSet<>();
 		Exp constraints = adapter.getPddl4jParser().getParser().getProblem().getConstraints();
 		if(constraints != null && constraints.getConnective().equals(Connective.AND)) {
 			List<Exp> children = constraints.getChildren();

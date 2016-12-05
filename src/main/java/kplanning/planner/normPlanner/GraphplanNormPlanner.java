@@ -23,18 +23,14 @@ public class GraphplanNormPlanner extends NormPlanner {
 		throw new NotImplementedException();
 	}
 
-	@Override
-	public @NotNull PlanSolution internalPlanNormCompliant(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, true);
-	}
-
-	@Override
-	public @NotNull PlanSolution internalPlanNormViolation(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, false);
-	}
-
-	private @NotNull PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
-		this.planningGraph.setReturnNormCompliantPlans(returnNormCompliant);
+	public @NotNull PlanSolution internalPlanNorm(NormPlannerType normPlannerType, boolean foundAllSolutions, int levels) {
+		if(normPlannerType.equals(NormPlannerType.NORM_COMPLIANT)) {
+			this.planningGraph.setReturnNormCompliantPlans(true);
+		} else if(normPlannerType.equals(NormPlannerType.NORM_VIOLATION)) {
+			this.planningGraph.setReturnNormCompliantPlans(false);
+		} else {
+			throw new NotImplementedException();
+		}
 		while (true) {
 			if (planningGraph.isGoalPossible()) {
 				PlanSolution planSolution = planningGraph.extractSolution(foundAllSolutions);

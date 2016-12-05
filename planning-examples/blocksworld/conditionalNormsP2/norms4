@@ -1,0 +1,4 @@
+ground;n1;OBLIGATION;on c c;stack b b;6
+ground;n2;PROHIBITION;clear c;stack a b;24
+ground;n3;PROHIBITION;clear a;stack c c;17
+ground;n4;OBLIGATION;on b c;stack a a;8

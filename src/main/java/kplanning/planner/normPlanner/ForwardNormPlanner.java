@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-// Solution from the other paper is quite clever, because it uses the already implemented mechanism to perform this...
 public class ForwardNormPlanner extends NormPlanner {
 
 	private boolean useNormKeeper = false;
@@ -25,23 +24,13 @@ public class ForwardNormPlanner extends NormPlanner {
 	}
 
 	@Override
-	public @NotNull PlanSolution internalPlanNormCompliant(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, true);
-	}
-
-	@Override
-	public @NotNull PlanSolution internalPlanNormViolation(boolean foundAllSolutions, int levels) {
-		return planNormAware(foundAllSolutions, levels, false);
-	}
-
-	@Override
 	public @NotNull PlanSolution internalPlan(boolean foundAllSolutions, int levels) {
 		throw new NotImplementedException();
 	}
 
-	private @NotNull PlanSolution planNormAware(boolean foundAllSolutions, int levels, boolean returnNormCompliant) {
+	public @NotNull PlanSolution internalPlanNorm(NormPlannerType normPlannerType, boolean foundAllSolutions, int levels) {
 		if(foundAllSolutions || levels > 0) {
-			// TODO: implement found all solutions to bfs search
+			// TODO: implement found all solutions
 			throw new NotImplementedException();
 		}
 
@@ -56,21 +45,68 @@ public class ForwardNormPlanner extends NormPlanner {
 			searchNode = new RuntimeNormSearchNode(completeInitState, norms);
 		}
 
-		if(goalGroundFact.isTrue(completeInitState)) {
-			return solution(searchNode);
-		}
-
 		PriorityQueue<NormSearchNode> frontier = new PriorityQueue<>((s1, s2) -> Integer.compare(s1.getCurrentCost(), s2.getCurrentCost()));
 		frontier.add(searchNode);
 
-		Set<STRIPSState> explored = new HashSet<>();
+		Set<NormSearchNode> explored = new HashSet<>();
 
 		while(true) {
 			if(frontier.isEmpty()) {
 				return PlanSolution.getNoSolutionPlanSolution(adapter);
 			}
 			searchNode = frontier.remove();
-			explored.add(searchNode.getState());
+
+			// TODO: refactor this. Mainly the way we keep track of norm violations...
+			if (goalGroundFact.isTrue(searchNode.getState())) {
+				if(normPlannerType.equals(NormPlannerType.NORM_COMPLIANT)) {
+					if(!searchNode.isCurrentlyViolation()) {
+						// A valid solution must NOT be currently violation
+						return solution(searchNode);
+					}
+				} else if(normPlannerType.equals(NormPlannerType.NORM_VIOLATION)) {
+					if(searchNode.isCurrentlyViolation()) {
+						// A valid solution MUST be currently violation
+						if (searchNode.hasCurrentCostInTotalCost()) {
+							// Cost already counts current norm cost
+							return solution(searchNode);
+						} else {
+							// Cost does not count current cost
+							searchNode.setCurrentCost(searchNode.getActionCost() + searchNode.getTotalNormCost());
+							searchNode.setHasCurrentCostInTotalCost(true);
+							frontier.add(searchNode);
+							explored.remove(searchNode);
+						}
+					}
+				} else if(normPlannerType.equals(NormPlannerType.NORM_MINIMUM_COST)) {
+					if(searchNode.isCurrentlyViolation()) {
+						if (searchNode.hasCurrentCostInTotalCost()) {
+							// Cost already counts current norm cost
+							return solution(searchNode);
+						} else {
+							// Cost does not count current cost
+							searchNode.setCurrentCost(searchNode.getActionCost() + searchNode.getTotalNormCost());
+							searchNode.setHasCurrentCostInTotalCost(true);
+							frontier.add(searchNode);
+							explored.remove(searchNode);
+						}
+					} else {
+						return solution(searchNode);
+					}
+				} else {
+					throw new IllegalStateException("Unrecognized norm type: " + normPlannerType);
+				}
+			}
+
+			if(explored.contains(searchNode)) {
+				// This check is made because we allow nodes already in frontier be added again;
+				// we did this in order to allow lower cost search nodes to be added to the priority queue.
+				// As we are using a version of a Priority Queue that does not allow removal of arbitrary elements,
+				// we cannot follow exactly the algorithm proposed in the paper (with the replace); but this is equivalent.
+				continue;
+			}
+
+			explored.add(searchNode);
+
 			for(Action action : actions) {
 				if(action.isApplicable(searchNode.getState())) {
 					STRIPSState newState = (STRIPSState) searchNode.getState().clone();
@@ -83,22 +119,24 @@ public class ForwardNormPlanner extends NormPlanner {
 						childNode = new RuntimeNormSearchNode(searchNode, action, newState, adapter.getNormAdapter().getGroundLtlNorms());
 					}
 
-					if (!frontier.contains(childNode) && !explored.contains(childNode.getState())) {
-						// If norm compliant
-						//noinspection SimplifiableBooleanExpression
-						if(returnNormCompliant) {
+					if (!explored.contains(childNode)) {
+						if(normPlannerType.equals(NormPlannerType.NORM_COMPLIANT)) {
+							// Discard absolute violation plans
 							if(!childNode.isAbsoluteViolation()) {
-								if (goalGroundFact.isTrue(childNode.getState()) && !childNode.isCurrentlyViolation()) {
-									return solution(childNode);
-								}
+								// Allow current violation plans to be added to the frontier
+								childNode.setCurrentCost(childNode.getActionCost());
 								frontier.add(childNode);
 							}
-						} else {
-							// !returnNormCompliant
-							if (goalGroundFact.isTrue(childNode.getState()) && childNode.isCurrentlyViolation()) {
-								return solution(childNode);
+						} else if(normPlannerType.equals(NormPlannerType.NORM_VIOLATION) || normPlannerType.equals(NormPlannerType.NORM_MINIMUM_COST)) {
+							// Allow all nodes to be added to the frontier
+							if(childNode.isAbsoluteViolation()) {
+								childNode.setCurrentCost(childNode.getActionCost() + childNode.getAbsoluteNormCost());
+							} else {
+								childNode.setCurrentCost(childNode.getActionCost());
 							}
 							frontier.add(childNode);
+						} else {
+							throw new IllegalStateException("Unrecognized norm type: " + normPlannerType);
 						}
 					}
 				}

@@ -1,0 +1,6 @@
+ltlGround;n1;OBLIGATION;ALWAYS_WITHIN;4;holding f;holding b
+ltlGround;n2;OBLIGATION;ALWAYS_WITHIN;4;holding c;holding k
+ltlGround;n3;OBLIGATION;SOMETIME_AFTER;-1;ontable h;ontable g
+ltlGround;n4;OBLIGATION;SOMETIME_AFTER;-1;ontable c;holding b
+ltlGround;n5;OBLIGATION;SOMETIME_AFTER;-1;ontable a;holding g
+ltlGround;n6;OBLIGATION;ALWAYS_WITHIN;4;holding l;holding h

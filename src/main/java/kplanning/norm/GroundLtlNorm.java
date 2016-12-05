@@ -8,7 +8,7 @@ import kplanning.DomainProblemAdapter;
 
 import java.util.List;
 
-public class GroundLtlNorm extends Norm {
+public class GroundLtlNorm extends Norm implements GroundNorm {
 	private DomainProblemAdapter adapter;
 	private NormModality normModality;
 
@@ -157,5 +157,21 @@ public class GroundLtlNorm extends Norm {
 	@Override
 	public String toString() {
 		return prefName + "\t(" + connective + " " + ((t != -1)? t + " " : "") + ((o != null)? o :"") + ((v != null)? v : "") + ")";
+	}
+
+	@Override
+	public int getCost() {
+		// TODO: implement cost for LTL norms
+		return 10;
+	}
+
+	@Override
+	public String toFile(String name, int cost) {
+		return "ltlGround;" + name + ";"
+				+ normModality + ";"
+				+ connective + ";"
+				+ t + ";"
+				+ o.getFacts().toString().replace("[", "").replace("]", "") + ";"
+				+ ((v != null)? (v.getFacts().toString().replace("[", "").replace("]", "")) : (""));
 	}
 }
