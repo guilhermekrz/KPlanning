@@ -208,6 +208,36 @@ public class PlanSolution {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof PlanSolution)) return false;
+
+		PlanSolution otherObj = (PlanSolution) obj;
+		if(otherObj.planSolutionType.equals(planSolutionType)) {
+			if(planSolutionType.equals(PlanSolutionType.NO_SOLUTION)) {
+				return true;
+			} else if(planSolutionType.equals(PlanSolutionType.PARALLEL_SOLUTIONS)) {
+				return solutions.equals(otherObj.solutions);
+			} else if(planSolutionType.equals(PlanSolutionType.SEQUENTIAL_SOLUTIONS)) {
+				return plans.equals(otherObj.plans);
+			} else {
+				throw new IllegalStateException("Plan Solution Type Not Found: " + planSolutionType);
+			}
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		int h = 0;
+		h = 37 * h + planSolutionType.hashCode();
+		h = 37 * h + solutions.hashCode();
+		h = 37 * h + plans.hashCode();
+		return h;
+	}
+
+	@Override
 	public String toString() {
 		String s;
 		if(planSolutionType.equals(PlanSolutionType.PARALLEL_SOLUTIONS)) {
@@ -238,7 +268,7 @@ public class PlanSolution {
 		} else if(planSolutionType.equals(PlanSolutionType.NO_SOLUTION)) {
 			s = "No solutions found";
 		} else {
-			s = "Unknown planSolutionType: " + planSolutionType;
+			throw new IllegalStateException("Plan Solution Type Not Found: " + planSolutionType);
 		}
 		return s;
 	}
