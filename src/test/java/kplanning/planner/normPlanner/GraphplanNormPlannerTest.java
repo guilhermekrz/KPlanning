@@ -34,12 +34,4 @@ public class GraphplanNormPlannerTest {
 		assertEquals(1, planSolution1.getPlans().size());
 	}
 
-	@Test
-	public void testBlocksworld() {
-		DomainProblemAdapter adapter = DomainProblemAdapter.newInstance(DomainProblemUtil.getDomainProblem("blocksworld", 1), "planning-examples/blocksworld/normsP1/norms3");
-		GraphplanNormPlanner planner = new GraphplanNormPlanner(adapter, adapter.getNormAdapter().getGroundConditionalNorms());
-		PlanSolution planSolution1 = planner.planNorm(NormPlanner.NormPlannerType.NORM_VIOLATION);
-		assertEquals(2, planSolution1.getPlans().size());
-	}
-
 }
