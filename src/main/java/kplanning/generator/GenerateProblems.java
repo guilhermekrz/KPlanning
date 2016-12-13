@@ -213,7 +213,7 @@ public class GenerateProblems {
 		private double sum;
 		private boolean treatAsRandom;
 
-		PredicateExclusive(boolean treatAsRandom) {
+		public PredicateExclusive(boolean treatAsRandom) {
 			predicateProbabilitySet = new HashSet<>();
 			sum = 0;
 			this.treatAsRandom = treatAsRandom;
@@ -223,7 +223,7 @@ public class GenerateProblems {
 			return predicateProbabilitySet;
 		}
 
-		void addPredicateProbability(PredicateProbability predicateProbability) {
+		public void addPredicateProbability(PredicateProbability predicateProbability) {
 			this.predicateProbabilitySet.add(predicateProbability);
 			this.sum += predicateProbability.probability;
 			if(this.sum > 1) {
@@ -253,7 +253,7 @@ public class GenerateProblems {
 			this(predicate, probability, null);
 		}
 
-		PredicateProbability(String predicate, double probability, String object) {
+		public PredicateProbability(String predicate, double probability, String object) {
 			this.predicate = predicate;
 			this.probability = probability;
 			if(probability < 0 || probability > 1) {

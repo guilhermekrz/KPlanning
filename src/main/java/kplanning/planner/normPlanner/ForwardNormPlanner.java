@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+// TODO: implement a BitSet forward norm planner
 public class ForwardNormPlanner extends NormPlanner {
 
 	private boolean useNormKeeper = false;

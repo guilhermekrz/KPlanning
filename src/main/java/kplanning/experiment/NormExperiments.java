@@ -1,6 +1,8 @@
-package kplanning.generator;
+package kplanning.experiment;
 
 import kplanning.DomainProblemAdapter;
+import kplanning.generator.GenerateNorms;
+import kplanning.generator.GenerateProblems;
 import kplanning.plan.PlanSolution;
 import kplanning.planner.normPlanner.ForwardNormPlanner;
 import kplanning.planner.normPlanner.GraphplanNormPlanner;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GenerateExperiments {
+public class NormExperiments {
 
 	public static void main(String[] args) {
 //		GenerateExperiments.generateExperiments("planning-examples/drinkanddrive-generated/",
@@ -102,11 +104,6 @@ public class GenerateExperiments {
 			} else {
 				normsDir = new File(problemFile.getParent() + "/ltlNormsP" + problemNum + "/");
 			}
-
-//			boolean runNaiveGraphplan = true;
-//			boolean runGraphplan = true;
-//			boolean runForward = true;
-//			boolean runForwardNK = true;
 
 			int normNum = 1;
 			File normFile = new File(normsDir.getPath() + "/norms" + normNum);
