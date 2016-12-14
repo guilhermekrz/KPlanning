@@ -18,9 +18,6 @@ public class GraphplanPlanner extends Planner {
 	@NotNull
 	@Override
 	public PlanSolution internalPlan(boolean foundAllSolutions, int levels) {
-		if(!foundAllSolutions && levels > 0) {
-			throw new IllegalStateException("If found all solutions is false, then levels should be zero");
-		}
 		while(true) {
 			if(planningGraph.isGoalPossible()) {
 				PlanSolution planSolution = planningGraph.extractSolution(foundAllSolutions);

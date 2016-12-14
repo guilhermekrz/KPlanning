@@ -8,6 +8,7 @@ import kplanning.util.DomainProblem;
 
 import java.io.File;
 
+// TODO: extend from Planner
 public class JavaffPlanner {
 
 	private DomainProblem domainProblem;

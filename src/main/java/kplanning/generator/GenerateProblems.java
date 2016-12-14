@@ -1,5 +1,6 @@
 package kplanning.generator;
 
+import kplanning.util.RandomSet;
 import org.jetbrains.annotations.Nullable;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;

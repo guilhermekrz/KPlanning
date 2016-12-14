@@ -5,6 +5,7 @@ import javaff.planning.PlanningGraph;
 import kplanning.DomainProblemAdapter;
 import org.jetbrains.annotations.Nullable;
 
+// TODO: extend from Planner
 public class JavaffGraphplanPlanner {
 
 	protected DomainProblemAdapter adapter;

@@ -3,6 +3,7 @@ package kplanning.planner;
 import kplanning.DomainProblemAdapter;
 import kplanning.plan.PlanSolutionAdapter;
 
+// TODO: extend from Planner, and change name to JavaGP
 public class GraphplanAdapter {
 
 	private DomainProblemAdapter adapter;

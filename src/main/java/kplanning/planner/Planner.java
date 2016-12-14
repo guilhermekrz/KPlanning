@@ -25,6 +25,10 @@ public abstract class Planner {
 
 	@NotNull
 	public final PlanSolution plan(boolean foundAllSolutions, int levels) {
+		if(!foundAllSolutions && levels > 0) {
+			throw new IllegalStateException("If found all solutions is false, then levels should be zero");
+		}
+
 		MemoryStatistic memoryStatistic = new MemoryStatistic();
 		memoryStatistic.init();
 		TimeStatistic timeStatistic = new TimeStatistic();

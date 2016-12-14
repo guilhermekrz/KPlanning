@@ -1,4 +1,4 @@
-package kplanning.generator;
+package kplanning.util;
 
 import java.util.*;
 
