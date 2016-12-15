@@ -94,8 +94,23 @@ and [PlanNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/ja
 
 
 ### Planning
-TODO
 
+A [planner](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/NormPlanner.java) is responsible for finding a solution, i.e. a sequence of actions, that leads from the initial to the goal state.
+When considering norms, this solution can be either norm-compliant or norm-violation; the planner can also find solutions that minimize the cost of both actions and penalty costs relative to norm violations.
+
+* Graphplan
+    * [Naive Graphplan](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/NaiveGraphplanNormPlanner.java)
+        * The simplest way to modify the Graphplan algorithm is to discard found solutions if they violate or if they do not violate the norms. In order to do this we perform the extract solution phase of the algorithm to find all possible solutions at the current level; then we iterate through each solution checking norm-compliant or norm-violation.
+    * [Graphplan](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/GraphplanNormPlanner.java)
+        * The solution as outlined above does not take advantage of the fact that it is possible, for conditional norms, to prune partial solutions during the backward search. The conditions to prune are the following:
+            * It is a conditional norm
+            * We want to find a norm-compliant plan and it is occurring a violation
+            * We know the truth value of the propositions of the norm 
+        * These conditions are necessary because we only have partial information during this phase of the backward search; more specifically, we know the sub-goals we are trying to achieve and the set of actions that can partially or fully achieve the propositions from the sub-goals. With this information we cannot, for most of the LTL norms 2 , detect a violation; for conditional norms, if the set of action preconditions include the context of the norm, we are able to detect a norm violation. Note that, if we want to find a norm-violation plan, we cannot prune solutions if we did not find any violations so far, because they still can occur at some later time.
+* [Forward state-space search - Using UCS](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/ForwardNormPlanner.java)
+    * [Build the current partial plan and check for norm-violation](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/RuntimeNormSearchNode.java)
+    * [Keep track of norm-violation in the search nodes, and update them as we choose new actions](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/planner/normPlanner/NormKeeperSearchNode.java)
+   
 ## Others
 
 * [Problem generator](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/generator/GenerateProblems.java)
