@@ -62,12 +62,36 @@ NC = Not completed in 30 minutes
 
 ### Formalization
 
-There are many different ways to formalize norms, but most of them use deontic logic to express the norm’s modality, i.e. if a norm is an obligation, a permission or a prohibition.\
+There are many different ways to formalize norms, but most of them use deontic logic to express the norm’s modality, i.e. if a norm is an obligation, a permission or a prohibition.
 We support two different types of norm formalization.
 
-TODO
-* Conditional norm
-* LTL norm
+* Conditional norm - Based on [Oren at al. 2009](https://link.springer.com/chapter/10.1007/978-3-642-00443-8_11#page-1)
+    * Consists of:
+        * μ ∈ {obligation, prohibition} represents the norm’s modality
+        * X is a set of ground predicates that represents the context to which a norm applies
+        * ρ is an action representing the object of the norm’s modality
+        * Penalty (cost) incurred to an agent when this norm is violated
+    * It is violated in state s if s |= X and agent a either: executes action ρ in state s and μ =prohibition; or does not execute action ρ in state s and μ = obligation
+* LTL norm - Based on [Gerevini and Long 2005](http://strathprints.strath.ac.uk/3149/)
+    * Expressed using one of the following modal operators, where φ and ψ are atomic formulae and t is a number:
+        * (at end φ) - φ must be true in the final state
+        * (always φ) - φ must be true in all states in the plan
+        * (sometime φ) - φ must be true in at least one state in the plan
+        * (at-most-once φ) - φ must be true in at most one state in the plan
+        * (sometime-after φ ψ) - whenever φ is true in a state s, there must be a state s' equal to or after s where ψ is true
+        * (sometime-before φ ψ) - whenever φ is true in a state s, there must be a state s' before s where ψ is true
+        * (always-within t φ ψ) - whenever φ is true in a state s, there must be a state s' at most t steps after s where ψ is true
+    * Although modal operators can be nested, in the current work we are considering only not nested operators, for simplicity. A LTL norm is violated if its interpretation is not true in a given plan.
+
+These two norm formalization have different complexities.
+While the first one can be checked in a single state, the second one needs to be checked along a path (i.e. a sequence of states, a finite trajectory).
+
+In our implementation we have a base [Norm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/Norm.java) class, and classes that extends this class must implement isViolationPlan(Plan plan): boolean method.
+We have four implementations: [ConditionalNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/ConditionalNorm.java) and its grounded counterpart [GroundConditionalNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/GroundConditionalNorm.java),
+and [LTLNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/LtlNorm.java) and [GroundLtlNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/GroundLtlNorm.java).
+Also, we have a [NormAdapter](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/NormAdapter.java) class responsible to populate norms from input files,
+and [PlanNorm](https://github.com/guilhermekrz/KPlanning/blob/master/src/main/java/kplanning/norm/PlanNorm.java) which enables to get violation and non-violation plans.
+
 
 ### Planning
 TODO
