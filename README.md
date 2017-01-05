@@ -1,4 +1,4 @@
-# KPlanning [![Build Status](https://travis-ci.com/guilhermekrz/KPlanning.svg?token=VBgyk5JAs3dn31fkKpxS&branch=master)](https://travis-ci.com/guilhermekrz/KPlanning)
+# KPlanning [![Build Status](https://travis-ci.org/guilhermekrz/KPlanning.svg?branch=master)](https://travis-ci.org/guilhermekrz/KPlanning)
 
 Repository containing some Planning Utils, to serve as a base of new projects. 
 
