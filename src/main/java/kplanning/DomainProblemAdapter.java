@@ -14,7 +14,7 @@ public class DomainProblemAdapter {
 
 	private DomainProblem domainProblem;
 	private int pddlVersion;
-	private String conditionalNormFile;
+	private String normFile;
 
 	// Parsers
 	private JavaffParser javaffParser;
@@ -68,7 +68,7 @@ public class DomainProblemAdapter {
 	private DomainProblemAdapter(DomainProblem domainProblem, int pddlVersion, String conditionalNormFile) {
 		this.domainProblem = domainProblem;
 		this.pddlVersion = pddlVersion;
-		this.conditionalNormFile = conditionalNormFile;
+		this.normFile = conditionalNormFile;
 	}
 
 	/**
@@ -120,8 +120,8 @@ public class DomainProblemAdapter {
 		return graphplanAdapter;
 	}
 
-	public String getConditionalNormFile() {
-		return conditionalNormFile;
+	public String getNormFile() {
+		return normFile;
 	}
 
 	public NormAdapter getNormAdapter() {

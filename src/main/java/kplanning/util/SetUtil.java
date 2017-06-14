@@ -1,11 +1,10 @@
 package kplanning.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SetUtil {
+
+	// Permutation
 
 	public static <T> List<List<T>> permutation(Set<T> nums) {
 		return permutation(new ArrayList<>(nums));
@@ -32,5 +31,31 @@ public class SetUtil {
 				permutation(accum, newPrefix, numsLeft);
 			}
 		}
+	}
+
+	// Cartesian product
+
+	public static <T> Set<Set<T>> cartesianProduct(Set<Set<T>> sets) {
+		Set<Set<T>> resultSets = new HashSet<>();
+		if (sets.size() == 0) {
+			resultSets.add(new HashSet<>());
+			return resultSets;
+		} else {
+			Set<T> first = sets.iterator().next();
+
+			Set<Set<T>> subset = new HashSet<>(sets);
+			subset.remove(first);
+
+			Set<Set<T>> remainingSets = cartesianProduct(subset);
+			for (T condition : first) {
+				for (Set<T> remainingSet : remainingSets) {
+					Set<T> resultSet = new HashSet<>();
+					resultSet.add(condition);
+					resultSet.addAll(remainingSet);
+					resultSets.add(resultSet);
+				}
+			}
+		}
+		return resultSets;
 	}
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env gnuplot
 # How to use? gnuplot -e "filename='blocksworld/conditionalCompliant'" -e "outputfilename='blocksworldConditionalCompliant.pdf'"  plotScript
 
-set terminal pdf font "Helvetica,10" enhanced
+set terminal pdf font "Helvetica,14" enhanced
 set output outputfilename
 
 set xlabel 'Problem'

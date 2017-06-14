@@ -21,4 +21,10 @@ public class NormAdapterTest {
 		assertEquals(2, adapter.getNormAdapter().getGroundConditionalNorms().size());
 	}
 
+	@Test
+	public void testGetStateNorms() {
+		assertEquals(1, adapter.getNormAdapter().getStateNorms().size());
+		assertEquals(5, adapter.getNormAdapter().getGroundStateNorms().size());
+	}
+
 }

@@ -7,6 +7,7 @@ import javaff.planning.STRIPSState;
 import kplanning.DomainProblemAdapter;
 import kplanning.exception.NotFoundActionException;
 import kplanning.exception.NotFoundPredicateSymbolException;
+import kplanning.norm.OrCompoundLiteral;
 import kplanning.reachableStates.ActionsReachableStatesStrategy;
 import kplanning.reachableStates.GetReachableStatesStrategy;
 import kplanning.util.DomainProblem;
@@ -133,6 +134,7 @@ public class JavaffParser {
 		throw new RuntimeException("Not found proposition: " + propositionList);
 	}
 
+	// Assuming ANDs?
 	public Set<CompoundLiteral> getGroundedCompoundLiteral(CompoundLiteral compoundLiteral) {
 		Set<Proposition> groundedPropositions = this.groundProblem.getGroundedPropositions();
 		Set<CompoundLiteral> compoundLiterals = new HashSet<>();
@@ -184,6 +186,43 @@ public class JavaffParser {
 			}
 		}
 		throw new NotFoundPredicateSymbolException("Not found predicate symbol: " + predicate);
+	}
+
+	// Format:
+	// at a
+	// at a AND at b AND at c
+	// at a OR at b OR at c
+	// at a AND at b OR at c
+	// Only works one level of hierarchy. Implicit parenthesis, assuming FND.
+	public OrCompoundLiteral getOrCompoundLiteral(String s, boolean ground) {
+		String ors[];
+		if(s.contains("OR")) {
+			ors = s.split("OR");
+		} else {
+			ors = new String[]{s};
+		}
+
+		OrCompoundLiteral c = new OrCompoundLiteral();
+		for(String or : ors) {
+			String ands[];
+			if(or.contains("AND")) {
+				ands = or.split("AND");
+			} else {
+				ands = new String[]{or};
+			}
+
+			CompoundLiteral andC = new And();
+			for(String and : ands) {
+				String andTrim = and.trim();
+				if(ground) {
+					andC.add(getFact(andTrim));
+				} else {
+					andC.add(new Predicate(getPredicateSymbol(andTrim)));
+				}
+			}
+			c.add(andC);
+		}
+		return c;
 	}
 
 	/**

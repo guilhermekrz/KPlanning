@@ -14,10 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NormAdapter {
 
@@ -26,6 +23,8 @@ public class NormAdapter {
 	private Set<GroundConditionalNorm> groundConditionalNorms;
 	private Set<LtlNorm> ltlNorms;
 	private Set<GroundLtlNorm> groundLtlNorms;
+	private Set<StateNorm> stateNorms;
+	private Set<GroundStateNorm> groundStateNorms;
 
 	/**
 	 * Constructors
@@ -41,7 +40,9 @@ public class NormAdapter {
 		this.groundConditionalNorms = new HashSet<>();
 		this.ltlNorms = new HashSet<>();
 		this.groundLtlNorms = new HashSet<>();
-		populateConditionalNorms();
+		this.stateNorms = new HashSet<>();
+		this.groundStateNorms = new HashSet<>();
+		populateNormsFromFile();
 		populateLtlNorms();
 	}
 
@@ -57,11 +58,19 @@ public class NormAdapter {
 		return groundConditionalNorms;
 	}
 
-	private void populateConditionalNorms() {
-		if(adapter.getConditionalNormFile() != null) {
-			File file = new File(adapter.getConditionalNormFile());
+	public Set<StateNorm> getStateNorms() {
+		return stateNorms;
+	}
+
+	public Set<GroundStateNorm> getGroundStateNorms() {
+		return groundStateNorms;
+	}
+
+	private void populateNormsFromFile() {
+		if(adapter.getNormFile() != null) {
+			File file = new File(adapter.getNormFile());
 			if (file.exists()) {
-				try (BufferedReader br = new BufferedReader(new FileReader(adapter.getConditionalNormFile()))) {
+				try (BufferedReader br = new BufferedReader(new FileReader(adapter.getNormFile()))) {
 					String line;
 					while ((line = br.readLine()) != null) {
 						if(!line.startsWith("//")) {
@@ -133,7 +142,37 @@ public class NormAdapter {
 										GroundLtlNorm groundLtlNorm = new GroundLtlNorm(adapter, normModality, name, normConnective, tInt, oCompoundLiteral, vCompoundLiteral);
 										this.groundLtlNorms.add(groundLtlNorm);
 									}
-								}  else {
+								} else if(type.equals("stateGround") || type.equals("stateUnground")) {
+									String name = split[1];
+									String modality = split[2];
+									String activation = split[3];
+									String condition = split[4];
+									String expiration = split[5];
+									String cost = split[6];
+
+									NormModality normModality = NormModality.valueOf(modality);
+									try {
+										int intCost = Integer.valueOf(cost);
+
+										boolean isGround = type.equals("stateGround");
+										OrCompoundLiteral activationLiteral = adapter.getJavaffParser().getOrCompoundLiteral(activation, isGround);
+										OrCompoundLiteral conditionLiteral = adapter.getJavaffParser().getOrCompoundLiteral(condition, isGround);
+										OrCompoundLiteral expirationLiteral = adapter.getJavaffParser().getOrCompoundLiteral(expiration, isGround);
+
+										if (type.equals("stateUnground")) {
+											StateNorm stateNorm = new StateNorm(adapter, normModality, name, intCost, activationLiteral, conditionLiteral, expirationLiteral);
+											stateNorms.add(stateNorm);
+											groundStateNorms.addAll(stateNorm.ground());
+										} else {
+											GroundStateNorm groundStateNorm = new GroundStateNorm(adapter, normModality, name, intCost, activationLiteral, conditionLiteral, expirationLiteral);
+											groundStateNorms.add(groundStateNorm);
+										}
+									} catch (IllegalArgumentException e) {
+										System.out.println("NormModality should be either PROHIBITION or OBLIGATION");
+									} catch (NotFoundPredicateSymbolException e) {
+										System.out.println("Not found specified predicate(s): " + Arrays.toString(split));
+									}
+								} else {
 									System.out.println("Error! Line should start with ground, unground, ltlUnground or ltlGround: " + line);
 								}
 							}

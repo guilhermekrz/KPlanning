@@ -114,7 +114,7 @@ public class ConditionalNorm extends Norm {
 
 	@Override
 	public int hashCode() {
-		int h = 0;
+		int h = 438;
 		h = 37 * h + context.hashCode();
 		h = 37 * h + normModality.hashCode();
 		h = 37 * h + actionTriggerCondition.hashCode();

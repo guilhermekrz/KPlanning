@@ -1,2 +1,4 @@
 unground;n1;PROHIBITION;drunk;move;1
 ground;n2;PROHIBITION;drunk;move a b;1
+stateUnground;n3;PROHIBITION;at;drunk;at;2
+stateGround;n4;PROHIBITION;at a;drunk AND at b;at b;1
